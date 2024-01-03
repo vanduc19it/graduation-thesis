@@ -1,0 +1,117 @@
+.container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  grid-gap: 26px;
+  margin: 0 28px;
+}
+.card {
+  width: 310px;
+  height: 420px;
+  padding: 20px;
+  border-radius: 0px;
+  margin-top: 20px;
+  transition: transform 0.3s ease-in-out;
+}
+.card2 {
+  width: 310px;
+  height: 460px;
+  padding: 20px;
+  border-radius: 0px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.card:hover , .card2:hover{
+  transform: translateY(-5px);
+}
+.card_body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 15px 10px;
+}
+.price {
+  margin: 15px 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.button_buy {
+  display: flex;
+  justify-content: space-between;
+}
+
+.image_nft {
+  transition: transform 0.3s ease-in-out;
+  
+}
+
+.image_nft:hover {
+  transform: scale(1.03);
+}
+
+.edit-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 26px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+
+.image-container:hover .edit-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.cover-container {
+  position: relative;
+}
+
+.edit-icon-cover {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 26px;
+  background: rgba(0, 0, 0, 0.4);
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+
+.cover-container:hover .edit-icon-cover {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.header {
+  position: relative;
+  overflow: hidden;
+  height: 140px;
+  margin: -50px -70px -10px -70px;
+  border-bottom: 1px solid #eee;
+}
+
+.header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/image/slider7.avif');
+  background-size: cover;
+  filter: blur(10px);
+  z-index: -1;
+}

@@ -1,0 +1,66 @@
+.heading {
+  font-size: 66px;
+  margin-bottom: 10px;
+}
+
+.btn {
+  background: transparent !important;
+  margin-right: 20px;
+  border-radius: 12px !important;
+  color: white !important;
+  margin-bottom: 30px;
+}
+.btn1 {
+  background: rgba(255,255,255, 0.2) !important;
+}
+.btn:hover {
+  background: rgba(255,255,255, 0.2) !important;
+}
+.container {
+  display: block;
+  margin: 35px 90px;
+  padding-bottom: 20px;
+}
+.card {
+  border: 1px solid black;
+  padding: 16px;
+  border-radius: 0px;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+.card:hover {
+  transform: translateY(-5px);
+  cursor: pointer;
+}
+.card_body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 15px 0px;
+}
+
+.price {
+  margin: 15px 0px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.info {
+  display: flex;
+  align-items: center;
+}
+.text {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0)); 
+  filter: blur(8px);
+}

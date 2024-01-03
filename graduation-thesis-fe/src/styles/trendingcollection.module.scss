@@ -1,0 +1,49 @@
+.container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.carousel {
+  margin: 0 2px;
+}
+.heading {
+  font-weight: 600;
+  font-family: "Poppins", sans-serif;
+  margin: 20px 28px;
+  font-size: 26px;
+}
+.card {
+  border: 1px solid black;
+  padding: 20px;
+  border-radius: 0px;
+}
+.card:hover {
+  cursor: pointer;
+}
+.card_container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  grid-gap: 10px;
+  transition: all 0.3s ease;
+}
+.card_container:hover {
+  transform: translateY(-2px);
+}
+.card_body {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 15px 0px;
+}
+
+.price {
+  margin: 15px 0px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.info {
+  display: flex;
+  align-items: center;
+}
