@@ -16,16 +16,12 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
-  ModalFooter,
   ModalHeader,
   ModalOverlay,
-  ScaleFade,
   Text,
-  border,
   useDisclosure,
   Drawer,
   DrawerBody,
-  DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
   DrawerContent,
@@ -33,7 +29,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import Link from "next/link";
-import React, { use, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { IoIosSearch } from "react-icons/io";
 import { BsCart4 } from "react-icons/bs";
 import { BiUserCircle, BiPencil } from "react-icons/bi";
@@ -81,19 +77,19 @@ const Navbar = () => {
         localStorage.setItem("balance", balance);
         setLogin(login + 1); //check login or not
         handleConnect1(true);
-        if(address !== "") {
+        if (address !== "") {
           handleCreateNewUser(address);
           toast({
-            title: 'Success',
-            description: 'Connected wallet successfully!',
-            status: 'success',
+            title: "Success",
+            description: "Connected wallet successfully!",
+            status: "success",
             duration: 1000,
             isClosable: true,
-            position: 'top',
+            position: "top",
           });
         }
 
-        if(checkNavigateProfile) {
+        if (checkNavigateProfile) {
           router.push(`http://127.0.0.1:3000/profile`);
         }
       } catch (error) {
@@ -112,12 +108,12 @@ const Navbar = () => {
     setLogout(logout + 1); //check logout
     handleConnect1(false);
     toast({
-      title: 'Success',
-      description: 'You has been logged out successfully!',
-      status: 'success',
+      title: "Success",
+      description: "You has been logged out successfully!",
+      status: "success",
       duration: 1000,
       isClosable: true,
-      position: 'top',
+      position: "top",
     });
   };
 
@@ -130,7 +126,11 @@ const Navbar = () => {
   }, [logout, login]);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { isOpen: isOpenModal2, onOpen: onOpenModal2, onClose: onCloseModal2 } = useDisclosure();
+  const {
+    isOpen: isOpenModal2,
+    onOpen: onOpenModal2,
+    onClose: onCloseModal2,
+  } = useDisclosure();
 
   const { handleSearch } = useContext(SearchContext);
   const [searchInput, setSearchInput] = useState("");
@@ -142,34 +142,36 @@ const Navbar = () => {
     }
   };
 
-  const handleCreateNewUser = async (address:string) => {
+  const handleCreateNewUser = async (address: string) => {
     const userData = {
-        name: "Unnamed",
-        wallet_address: address,
-        avatar: "",
-        cover_photo: "",
+      name: "Unnamed",
+      wallet_address: address,
+      avatar: "",
+      cover_photo: "",
     };
 
     console.log(userData);
 
     try {
-        const response = await axios.post('http://localhost:5000/create_user', userData, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        });
+      const response = await axios.post(
+        "http://localhost:5000/create_user",
+        userData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-        const data = response.data;
-        console.log(data);
+      const data = response.data;
+      console.log(data);
     } catch (error) {
-        console.error('Error:', error);
+      console.error("Error:", error);
     }
-};
+  };
 
-
-
-const handleNavigateProfile = () => {
-    if(isLoggedIn) {
+  const handleNavigateProfile = () => {
+    if (isLoggedIn) {
       //chuyen trang profile
       router.push(`http://127.0.0.1:3000/profile`);
     } else {
@@ -177,47 +179,46 @@ const handleNavigateProfile = () => {
       setCheckNavigateProfile(true);
       onOpen();
     }
-}
+  };
 
-const [cartItems, setCartItems] = useState([]);
-useEffect(() => {
-  // Lấy giỏ hàng từ localStorage nếu có
-  const storedCartItems = JSON.parse(localStorage.getItem("cartItems") || "[]");
+  const [cartItems, setCartItems] = useState([]);
+  useEffect(() => {
+    // Lấy giỏ hàng từ localStorage nếu có
+    const storedCartItems = JSON.parse(
+      localStorage.getItem("cartItems") || "[]"
+    );
 
-  // Set giỏ hàng vào state
-  setCartItems(storedCartItems);
-}, [isOpenModal2]);
+    // Set giỏ hàng vào state
+    setCartItems(storedCartItems);
+  }, [isOpenModal2]);
 
 
-console.log(cartItems,"ehhh");
-
-
-const handleClearAll = () => {
+  const handleClearAll = () => {
     // Set giỏ hàng mới vào state
     setCartItems([]);
 
     // Xóa toàn bộ giỏ hàng khỏi localStorage
     localStorage.removeItem("cartItems");
     toast({
-      title: 'Success',
-      description: 'You has been clear all cart successfully !',
-      status: 'success',
+      title: "Success",
+      description: "You has been clear all cart successfully !",
+      status: "success",
       duration: 2000,
       isClosable: true,
-      position: 'top',
+      position: "top",
     });
-}
+  };
 
-const handleBuyCart = () => {
-  toast({
-    title: 'Error',
-    description: 'Complete purchase failed !',
-    status: 'error',
-    duration: 2000,
-    isClosable: true,
-    position: 'top',
-  });
-}
+  const handleBuyCart = () => {
+    toast({
+      title: "Error",
+      description: "Complete purchase failed !",
+      status: "error",
+      duration: 2000,
+      isClosable: true,
+      position: "top",
+    });
+  };
 
   return (
     <>
@@ -283,7 +284,7 @@ const handleBuyCart = () => {
             </div>
             <div className={styles.connect}>
               <div className={styles.wallet}>
-                <Image src="/bitkeep.png" alt=""  loading="lazy"/>
+                <Image src="/bitkeep.png" alt="" loading="lazy" />
                 <Text style={{ fontWeight: "700", marginLeft: "20px" }}>
                   Bitkeep
                 </Text>
@@ -294,7 +295,7 @@ const handleBuyCart = () => {
             </div>
             <div className={styles.connect}>
               <div className={styles.wallet}>
-                <Image src="/core.png" alt=""  loading="lazy"/>
+                <Image src="/core.png" alt="" loading="lazy" />
                 <Text style={{ fontWeight: "700", marginLeft: "20px" }}>
                   Core
                 </Text>
@@ -312,23 +313,34 @@ const handleBuyCart = () => {
             <Image
               src="/logo.png"
               alt=""
-              style={{ width: "30px",height: "48px", marginRight: "10px" }}
+              style={{ width: "30px", height: "48px", marginRight: "10px" }}
               loading="lazy"
             />
-            <Text style={{ fontWeight: "600", fontSize: "18px", color:"white" }}>
+            <Text
+              style={{ fontWeight: "600", fontSize: "18px", color: "white" }}
+            >
               Digital World
             </Text>
           </Link>
         </div>
         <div className={styles.menu}>
-          <Link style={{ fontWeight: "600", fontSize: "18px" ,color:"white"}} href="/">
+          <Link
+            style={{ fontWeight: "600", fontSize: "18px", color: "white" }}
+            href="/"
+          >
             Drops
           </Link>
-          <Link style={{ fontWeight: "600", fontSize: "18px" ,color:"white"}} href="/">
+          <Link
+            style={{ fontWeight: "600", fontSize: "18px", color: "white" }}
+            href="/"
+          >
             Stats
           </Link>
           <div>
-            <Link style={{ fontWeight: "600", fontSize: "18px", color:"white" }} href="/createNewNFT">
+            <Link
+              style={{ fontWeight: "600", fontSize: "18px", color: "white" }}
+              href="/createNewNFT"
+            >
               Create
             </Link>
           </div>
@@ -340,12 +352,12 @@ const handleBuyCart = () => {
               placeholder="Search items"
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              style={{background:"rgba(255,255,255,0.2)", color:"white"}}
+              style={{ background: "rgba(255,255,255,0.2)", color: "white" }}
               className={styles.search}
             />
             <InputLeftElement
               pointerEvents="none"
-              children={<Icon as={IoIosSearch} style={{color:"white"}}/>}
+              children={<Icon as={IoIosSearch} style={{ color: "white" }} />}
             />
           </InputGroup>
         </div>
@@ -354,9 +366,9 @@ const handleBuyCart = () => {
             <Button
               style={{
                 borderRadius: "10px",
-                background:"rgba(255,255,255,0.2)", 
-                color:"white",
-                marginRight:"10px"
+                background: "rgba(255,255,255,0.2)",
+                color: "white",
+                marginRight: "10px",
               }}
               onClick={onOpen}
             >
@@ -378,7 +390,16 @@ const handleBuyCart = () => {
               )}
             </Button>
             <Menu>
-              <MenuButton as={Button} style={{borderRadius: "10px",padding:10, textAlign:"center" , background:"rgba(255,255,255,0.2)", color:"white" }}>
+              <MenuButton
+                as={Button}
+                style={{
+                  borderRadius: "10px",
+                  padding: 10,
+                  textAlign: "center",
+                  background: "rgba(255,255,255,0.2)",
+                  color: "white",
+                }}
+              >
                 {address?.length > 0 ? (
                   <Image
                     src="/1.jfif"
@@ -421,105 +442,145 @@ const handleBuyCart = () => {
             </Menu>
           </div>
           <div>
-            <Button style={{padding:10, borderRadius: "10px", marginLeft: "10px", background:"rgba(255,255,255,0.2)", color:"white" }} onClick={onOpenModal2}>
+            <Button
+              style={{
+                padding: 10,
+                borderRadius: "10px",
+                marginLeft: "10px",
+                background: "rgba(255,255,255,0.2)",
+                color: "white",
+              }}
+              onClick={onOpenModal2}
+            >
               <BsCart4 size={25} />
             </Button>
           </div>
         </div>
       </div>
-       {/* Drawer cart */}
+      {/* Drawer cart */}
       <Drawer
         isOpen={isOpenModal2}
-        placement='right'
+        placement="right"
         onClose={onCloseModal2}
-        size="sm" 
+        size="sm"
       >
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
           <DrawerHeader>
-            <div style={{display:"flex", alignItems:"center", gap: 8}}>
-               Your cart <BsCart4 size={20} />
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              Your cart <BsCart4 size={20} />
             </div>
           </DrawerHeader>
           <DrawerBody>
-            {
-              cartItems.length > 0 ? (
-                <div>
-                <div style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-                  <Text>
-                    {cartItems.length} item
-                  </Text>
-                  <Text style={{cursor:"pointer"}} onClick={handleClearAll}>
+            {cartItems.length > 0 ? (
+              <div>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text>{cartItems.length} item</Text>
+                  <Text style={{ cursor: "pointer" }} onClick={handleClearAll}>
                     Clear all
                   </Text>
-
                 </div>
-                {cartItems.map((item:any, index:any)=> (
-                   <div style={{display:"flex", marginTop:"40px", alignItems:"center", border:"1px solid #ddd", borderRadius:8, padding:"8px"}} key={index}>
-                   <Image
-                       src={item?.image?.replace("ipfs://", "https://ipfs.io/ipfs/")}
-                       alt=""
-                       style={{
-                         width: "80px",
-                         height: "80px",
-                         marginRight:"20px",
-                         borderRadius:"20px"
-                       }}
-                       loading="lazy"
-                     />
-                     <div>
-                     <Text style={{fontSize:"22px", color:"black"}}>
-                       {item.name}
-                     </Text>
-                     <Text>
-                       {item.price}
-                     </Text>
-                     </div>
-                     <div style={{marginLeft:"auto", background:"white"}}>
-                     <MdDelete style={{fontSize:"30px"}}/>
-                     </div>
-                   </div>
-                )
+                {cartItems.map((item: any, index: any) => (
+                  <div
+                    style={{
+                      display: "flex",
+                      marginTop: "40px",
+                      alignItems: "center",
+                      border: "1px solid #ddd",
+                      borderRadius: 8,
+                      padding: "8px",
+                    }}
+                    key={index}
+                  >
+                    <Image
+                      src={item?.image?.replace(
+                        "ipfs://",
+                        "https://ipfs.io/ipfs/"
+                      )}
+                      alt=""
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        marginRight: "20px",
+                        borderRadius: "20px",
+                      }}
+                      loading="lazy"
+                    />
+                    <div>
+                      <Text style={{ fontSize: "22px", color: "black" }}>
+                        {item.name}
+                      </Text>
+                      <Text>{item.price}</Text>
+                    </div>
+                    <div style={{ marginLeft: "auto", background: "white" }}>
+                      <MdDelete style={{ fontSize: "30px" }} />
+                    </div>
+                  </div>
+                ))}
 
-                )}
-               
-                <div style={{display:"flex", alignItems:"center", justifyContent:"center"}}>
-                <Button style={{
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Button
+                    style={{
                       background: "#009cf7",
                       color: "#fff",
-                      width:"100%",
-                      padding:"12px 40px",
-                      marginTop:"40px"
+                      width: "100%",
+                      padding: "12px 40px",
+                      marginTop: "40px",
                     }}
                     onClick={handleBuyCart}
-                    >Complete purchase</Button>
+                  >
+                    Complete purchase
+                  </Button>
                 </div>
-                </div>
-              ) : (
-                <>
-                  <Image
-                    src="/image/empty-cart.png"
-                    alt=""
-                    style={{
-                      width: "300px",
-                      height: "300px",
-                      margin:"20px auto"
-                    }}
-                    loading="lazy"
-                  />
-                <Text style={{ fontWeight: "600",textAlign:"center", fontSize:20, marginBottom:10, color:"#3a9bfc" }}>
+              </div>
+            ) : (
+              <>
+                <Image
+                  src="/image/empty-cart.png"
+                  alt=""
+                  style={{
+                    width: "300px",
+                    height: "300px",
+                    margin: "20px auto",
+                  }}
+                  loading="lazy"
+                />
+                <Text
+                  style={{
+                    fontWeight: "600",
+                    textAlign: "center",
+                    fontSize: 20,
+                    marginBottom: 10,
+                    color: "#3a9bfc",
+                  }}
+                >
                   Your Cart is Empty
                 </Text>
-                <Text style={{ fontWeight: "400", textAlign:"center", fontSize:17, color:"#bbb" }}>
+                <Text
+                  style={{
+                    fontWeight: "400",
+                    textAlign: "center",
+                    fontSize: 17,
+                    color: "#bbb",
+                  }}
+                >
                   Add items to get started
                 </Text>
-                </>
-              )
-            }
-                 
-             
-            
+              </>
+            )}
           </DrawerBody>
         </DrawerContent>
       </Drawer>

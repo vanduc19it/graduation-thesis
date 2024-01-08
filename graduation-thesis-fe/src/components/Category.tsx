@@ -14,10 +14,10 @@ const Category = () => {
             borderRadius: "20px",
           }}
         >
-          <Image src="/image/11.png" alt=""  loading="lazy"/>
+          <Image src="/image/11.png" alt="" loading="lazy" />
           <div className={styles.category_img}>
             {" "}
-            <Image src="/image/1.svg" alt=""  loading="lazy"/>
+            <Image src="/image/1.svg" alt="" loading="lazy" />
           </div>
           <div className={styles.card_body}>
             <Text
@@ -34,10 +34,10 @@ const Category = () => {
             borderRadius: "20px",
           }}
         >
-          <Image src="/image/22.png" alt=""  loading="lazy"/>
+          <Image src="/image/22.png" alt="" loading="lazy" />
           <div className={styles.category_img}>
             {" "}
-            <Image src="/image/2.svg" alt=""  loading="lazy"/>
+            <Image src="/image/2.svg" alt="" loading="lazy" />
           </div>
           <div className={styles.card_body}>
             <Text
@@ -54,10 +54,10 @@ const Category = () => {
             borderRadius: "20px",
           }}
         >
-          <Image src="/image/33.png" alt=""  loading="lazy"/>
+          <Image src="/image/33.png" alt="" loading="lazy" />
           <div className={styles.category_img}>
             {" "}
-            <Image src="/image/3.svg" alt=""  loading="lazy"/>
+            <Image src="/image/3.svg" alt="" loading="lazy" />
           </div>
           <div className={styles.card_body}>
             <Text
@@ -74,10 +74,10 @@ const Category = () => {
             borderRadius: "20px",
           }}
         >
-          <Image src="/image/44.png" alt=""  loading="lazy"/>
+          <Image src="/image/44.png" alt="" loading="lazy" />
           <div className={styles.category_img}>
             {" "}
-            <Image src="/image/4.svg" alt=""  loading="lazy"/>
+            <Image src="/image/4.svg" alt="" loading="lazy" />
           </div>
           <div className={styles.card_body}>
             <Text
@@ -94,10 +94,10 @@ const Category = () => {
             borderRadius: "20px",
           }}
         >
-          <Image src="/image/55.png" alt=""  loading="lazy"/>
+          <Image src="/image/55.png" alt="" loading="lazy" />
           <div className={styles.category_img}>
             {" "}
-            <Image src="/image/5.svg" alt=""  loading="lazy"/>
+            <Image src="/image/5.svg" alt="" loading="lazy" />
           </div>
 
           <div className={styles.card_body}>
@@ -116,10 +116,10 @@ const Category = () => {
             borderRadius: "20px",
           }}
         >
-          <Image src="/image/66.png" alt=""  loading="lazy"/>
+          <Image src="/image/66.png" alt="" loading="lazy" />
           <div className={styles.category_img}>
             {" "}
-            <Image src="/image/6.svg" alt=""  loading="lazy"/>
+            <Image src="/image/6.svg" alt="" loading="lazy" />
           </div>
 
           <div className={styles.card_body}>
@@ -137,10 +137,10 @@ const Category = () => {
             borderRadius: "20px",
           }}
         >
-          <Image src="/image/77.png" alt=""  loading="lazy"/>
+          <Image src="/image/77.png" alt="" loading="lazy" />
           <div className={styles.category_img}>
             {" "}
-            <Image src="/image/7.svg" alt=""  loading="lazy"/>
+            <Image src="/image/7.svg" alt="" loading="lazy" />
           </div>
           <div className={styles.card_body}>
             <Text
@@ -157,10 +157,10 @@ const Category = () => {
             borderRadius: "20px",
           }}
         >
-          <Image src="/image/88.png" alt=""  loading="lazy"/>
+          <Image src="/image/88.png" alt="" loading="lazy" />
           <div className={styles.category_img}>
             {" "}
-            <Image src="/image/8.svg" alt=""  loading="lazy"/>
+            <Image src="/image/8.svg" alt="" loading="lazy" />
           </div>
 
           <div className={styles.card_body}>

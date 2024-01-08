@@ -3,6 +3,7 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import {
+  Box,
   Button,
   Card,
   Checkbox,
@@ -25,6 +26,7 @@ import {
   NumberInput,
   NumberInputField,
   NumberInputStepper,
+  Select,
   Spinner,
   Text,
   Textarea,
@@ -55,6 +57,7 @@ const CreateNewNFT = () => {
   const toast = useToast();
 
   useEffect(() => {
+    console.log(process.env.NEXT_PUBLIC_TOKEN_NFTSTORAGE)
     const addressData: any = localStorage.getItem("address");
     if (addressData?.length > 0) {
       handleConnect1(true);
@@ -78,7 +81,7 @@ const CreateNewNFT = () => {
       event.preventDefault();
       const file: any = event.target.files[0];
       setFileImage(file);
-      
+
       const reader: any = new FileReader();
       reader.readAsArrayBuffer(file);
       reader.onload = () => {
@@ -97,106 +100,35 @@ const CreateNewNFT = () => {
   const [loading, setLoading] = useState(false);
   const [tx, setTx] = useState("");
 
-  // const createNFT = async () => {
-  //   if (!isLoggedIn) {
-  //     alert("Vui lòng kết nối ví metamask! ");
-  //   } else {
-  //     const nftstorage = new NFTStorage({
-  //       token:
-  //         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweEQ2Yzk0QzMxRTkxMTU4MTVEQjNGMzg0ODlCOWM0RTg4QTU0OGQzOGEiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY3NzEyMTMyMzIxMCwibmFtZSI6Ik5GVF9TVE9SQUdFX0tFWSJ9.0cZ-vUh5ouxp_TUVCThNhRA_YKmixC2Fwh5WEfTh-J8" ??
-  //         "",
-  //     });
-
-  //     if (imageBuffer && name != "" && description != "") {
-  //       if (price > 0) {
-  //         try {
-  //           setLoading(true);
-
-  //           const formData = new FormData();
-  //           formData.append('file', fileImage);
-
-
-  //           fetch('http://localhost:5000/detect_copy_nft', {
-  //               method: 'POST',
-  //               body: formData,
-  //           })
-  //           .then(response => response.json())
-  //           .then((data:any) => {
-  //               console.log(data,"hello1");
-  //               const is_copy = data?.is_similar;
-              
-  //               if(!is_copy) {
-  //                    // const { ipnft } = await nftstorage.store({
-  //                     //   name,
-  //                     //   description,
-  //                     //   price,
-  //                     //   image: new File([imageBuffer], "image", { type: "image/png" }),
-  //                     // });
-
-  //                     // const ipfsURL = `https://ipfs.io/ipfs/${ipnft}/metadata.json`;
-  //                     // // mint nft
-  //                     // const tx = await (await nft.mint(ipfsURL)).wait();
-
-  //                     // if (tx) {
-  //                     //   setTx(tx?.transactionHash);
-  //                     //   onOpen();
-  //                     //   setLoading(false);
-  //                     // }
-  //               } else {
-  //                 toast({
-  //                   title: 'Warning',
-  //                   description: 'Hệ thống xác nhận NFT này là copy trùng lặp hoặc giả mạo, vui lòng tạo một nft khác!',
-  //                   status: 'warning',
-  //                   duration: 3000,
-  //                   isClosable: true,
-  //                   position: 'top',
-  //                 });
-  //               }
-  //           })
-  //           .catch(error => {
-  //               console.error('Error:', error);
-  //           });
- 
-  //         } catch (error) {
-  //           console.log(error);
-  //           setLoading(false);
-  //         }
-  //       } else {
-  //         alert("Giá nft phải lớn hơn 0!");
-  //       }
-  //     } else {
-  //       alert("Vui lòng nhập đầy đủ thông tin nft !");
-  //     }
-  //   }
-  // };
-
   const createNFT = async () => {
     if (!isLoggedIn) {
       alert("Vui lòng kết nối ví metamask! ");
     } else {
       const nftstorage = new NFTStorage({
-        token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweEQ2Yzk0QzMxRTkxMTU4MTVEQjNGMzg0ODlCOWM0RTg4QTU0OGQzOGEiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTY3NzEyMTMyMzIxMCwibmFtZSI6Ik5GVF9TVE9SQUdFX0tFWSJ9.0cZ-vUh5ouxp_TUVCThNhRA_YKmixC2Fwh5WEfTh-J8" ??
+        token: `${process.env.NEXT_PUBLIC_TOKEN_NFTSTORAGE}` ??
           "",
       });
-  
+
       if (imageBuffer && name != "" && description != "") {
         if (price > 0) {
           try {
             setLoading(true);
-  
+
             const formData = new FormData();
-            formData.append('file', fileImage);
-  
-            const response = await fetch('http://localhost:5000/detect_copy_nft', {
-              method: 'POST',
-              body: formData,
-            });
-  
+            formData.append("file", fileImage);
+
+            const response = await fetch(
+              "http://localhost:5000/detect_copy_nft",
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
+
             const data = await response.json();
             console.log(data, "hello1");
             const is_copy = data?.is_similar;
-  
+
             if (!is_copy) {
               const { ipnft } = await nftstorage.store({
                 name,
@@ -204,11 +136,11 @@ const CreateNewNFT = () => {
                 price,
                 image: new File([imageBuffer], "image", { type: "image/png" }),
               });
-  
+
               const ipfsURL = `https://ipfs.io/ipfs/${ipnft}/metadata.json`;
               // mint nft
               const tx = await (await nft.mint(ipfsURL)).wait();
-  
+
               if (tx) {
                 setTx(tx?.transactionHash);
                 onOpen();
@@ -216,43 +148,42 @@ const CreateNewNFT = () => {
               }
             } else {
               toast({
-                title: 'Warning',
-                description: 'Hệ thống xác nhận NFT này là copy trùng lặp hoặc giả mạo, vui lòng tạo một nft khác!',
-                status: 'warning',
+                title: "Warning",
+                description:
+                  "Hệ thống xác nhận NFT này là copy trùng lặp hoặc giả mạo, vui lòng tạo một nft khác!",
+                status: "warning",
                 duration: 3000,
                 isClosable: true,
-                position: 'top',
+                position: "top",
               });
               setLoading(false);
             }
           } catch (error) {
-            console.error('Error:', error);
+            console.error("Error:", error);
             setLoading(false);
           }
         } else {
           toast({
-            title: 'Info',
-            description: 'Giá nft phải lớn hơn 0!',
-            status: 'info',
+            title: "Info",
+            description: "Giá nft phải lớn hơn 0!",
+            status: "info",
             duration: 2000,
             isClosable: true,
-            position: 'top',
+            position: "top",
           });
         }
       } else {
         toast({
-          title: 'Info',
-          description: 'Vui lòng nhập đầy đủ thông tin nft !',
-          status: 'info',
+          title: "Info",
+          description: "Vui lòng nhập đầy đủ thông tin nft !",
+          status: "info",
           duration: 2000,
           isClosable: true,
-          position: 'top',
+          position: "top",
         });
       }
     }
   };
-  
-  
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
@@ -261,6 +192,12 @@ const CreateNewNFT = () => {
     setTimeout(() => {
       onClose();
     }, 4000);
+  };
+
+  const [selectedCategory, setSelectedCategory] = useState('');
+
+  const handleCategoryChange = (event:any) => {
+    setSelectedCategory(event.target.value);
   };
 
   return (
@@ -283,10 +220,8 @@ const CreateNewNFT = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
-      <div
-        className={styles.header}
-      > 
-        <Navbar/>
+      <div className={styles.header}>
+        <Navbar />
       </div>
       <div
         style={{
@@ -294,20 +229,37 @@ const CreateNewNFT = () => {
           justifyContent: "space-around",
           alignItems: "center",
           marginBottom: "20px",
-          
         }}
       >
-        <div style={{ width: "60vw" , padding:"20px", borderRadius:"20px", boxShadow: " 2px 2px 10px rgba(0, 0, 0, 0.1), -2px -2px 10px rgba(0, 0, 0, 0.1)", }}>
+        <div
+          style={{
+            width: "60vw",
+            padding: "20px",
+            borderRadius: "20px",
+            boxShadow:
+              " 2px 2px 10px rgba(0, 0, 0, 0.1), -2px -2px 10px rgba(0, 0, 0, 0.1)",
+          }}
+        >
           <Text
-            style={{ fontSize: "28px", fontWeight: "600", margin: "20px 0px", textAlign: "center" }}
+            style={{
+              fontSize: "28px",
+              fontWeight: "600",
+              margin: "20px 0px",
+              textAlign: "center",
+            }}
           >
             Create New Item
           </Text>
-          <Text style={{ fontWeight: "600", margin: "10px 0px",  }}>
+          <Text style={{ fontWeight: "600", margin: "10px 0px" }}>
             Upload File
           </Text>
           <FormControl>
-            <Input type="file" onChange={uploadToIPFS} id="input-image" style={{ borderRadius:"20px"}} />
+            <Input
+              type="file"
+              onChange={uploadToIPFS}
+              id="input-image"
+              style={{ borderRadius: "20px" }}
+            />
             <FormLabel style={{ fontWeight: "600", margin: "10px 0px" }}>
               Title
             </FormLabel>
@@ -317,7 +269,7 @@ const CreateNewNFT = () => {
               placeholder="Item name"
               value={name}
               id="input-name"
-              style={{ borderRadius:"20px"}}
+              style={{ borderRadius: "20px" }}
             />
             <FormLabel style={{ fontWeight: "600", margin: "10px 0px" }}>
               Description
@@ -327,68 +279,96 @@ const CreateNewNFT = () => {
               onChange={(e: any) => setDescription(e.target.value)}
               value={description}
               id="input-desc"
-              style={{resize:"none", borderRadius:"20px"}}
+              style={{ resize: "none", borderRadius: "20px" }}
             />
-            <div style={{display:"flex", justifyContent:"space-between"}}>
-            <div  style={{ width:"48%"}}>
-            <FormLabel style={{ fontWeight: "600", margin: "10px 0px", }}>
-              Price
-            </FormLabel>
-            <NumberInput
-              max={10}
-              min={0}
-              onChange={(e: any) => setPrice(e)}
-              value={price}
-              id="input-price"
-              style={{ borderRadius:"20px"}}
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <div style={{ width: "48%" }}>
+                <FormLabel style={{ fontWeight: "600", margin: "10px 0px" }}>
+                  Price
+                </FormLabel>
+                <NumberInput
+                  max={10}
+                  min={0}
+                  onChange={(e: any) => setPrice(e)}
+                  value={price}
+                  id="input-price"
+                  style={{ borderRadius: "20px" }}
+                >
+                  <NumberInputField style={{ borderRadius: "20px" }} />
+                  <NumberInputStepper>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
+              </div>
+                            <Box  style={{
+                    width: "48%",
+                    padding: "0px",
+                    marginTop: "44px",
+                    borderRadius: "20px",
+                  }}>
+                    <FormControl>
+                      <Select value={selectedCategory} onChange={handleCategoryChange} >
+                        <option value="category1">Art</option>
+                        <option value="category2">Gaming</option>
+                        <option value="category3">Photography</option>
+                        <option value="category2">Music</option>
+                        <option value="category3">Video</option>
+                        <option value="category3">PFPs</option>
+                        {/* Add more options as needed */}
+                      </Select>
+                    </FormControl>
+
+                
+                  </Box>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
             >
-              <NumberInputField   style={{ borderRadius:"20px"}}/>
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-            </div >
-            <Menu >
-              <MenuButton as={Button} rightIcon={<MdKeyboardArrowDown style={{marginRight:"8px", fontSize:"20px"}}/>}  style={{ width:"48%", padding:"0px", marginTop:'44px', borderRadius:"20px"}} >
-                <Text style={{position:"absolute", top:"50%",  transform: 'translate(12px, -50%)',}}>Art</Text>
-              </MenuButton>
-              <MenuList>
-                <MenuItem>Download</MenuItem>
-                <MenuItem>Create a Copy</MenuItem>
-                <MenuItem>Mark as Draft</MenuItem>
-                <MenuItem>Delete</MenuItem>
-                <MenuItem>Attend a Workshop</MenuItem>
-              </MenuList>
-              </Menu>
+              <Checkbox mt={4}>I agree to all terms & conditions</Checkbox>
+              <Button
+                type="submit"
+                onClick={createNFT}
+                style={{
+                  width: "200px",
+                  marginTop: "40px",
+                  borderRadius: "20px",
+                  color: "white",
+                  background: "#ae4cff",
+                  marginBottom: "30px",
+                }}
+              >
+                {!loading ? (
+                  "Create New Item"
+                ) : (
+                  <>
+                    <Text style={{ marginRight: "4px" }}>Creating</Text>{" "}
+                    <Spinner size="sm" />
+                  </>
+                )}
+              </Button>
             </div>
-           
-            <div style={{display:"flex", alignItems:"center", justifyContent:"space-between"}}>
-            <Checkbox mt={4}>I agree to all terms & conditions</Checkbox>
-            <Button  type="submit" onClick={createNFT} style={{width:"200px",marginTop:"40px", borderRadius:"20px", color:"white", background:"#ae4cff", marginBottom:"30px"}}>
-              {!loading ? (
-                "Create New Item"
-              ) : (
-                <>
-                  <Text style={{ marginRight: "4px" }}>Creating</Text>{" "}
-                  <Spinner size="sm" />
-                </>
-              )}
-            </Button>
-            </div>
-            
           </FormControl>
         </div>
         <div>
-          <div style={{display:"flex", alignItems:"center", gap:8}}>
-          <Text
-            style={{ fontWeight: "600", margin: "10px 0px", fontSize: "18px" }}
-          >
-            Live Preview 
-          </Text>
-          <FaEye />
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Text
+              style={{
+                fontWeight: "600",
+                margin: "10px 0px",
+                fontSize: "18px",
+              }}
+            >
+              Live Preview
+            </Text>
+            <FaEye />
           </div>
-         
+
           <Card
             className={styles.card}
             style={{
@@ -405,29 +385,30 @@ const CreateNewNFT = () => {
                 margin: "0 10px",
                 height: "320px",
               }}
-            > 
-            {
-              image !== "" ? (<Image
-                src={image}
-                alt="nft image"
-                style={{
-                  backgroundSize: "contain",
-                  width: 250,
-                  height: 250,
-                  objectFit: "contain",
-                  background: "#fff",
-                  border: "1px solid #eee",
-                  borderRadius: "20px",
-                }}
-              />) : (<Image
-                src={"/image/preview.png"}
-                alt="nft image"
-                style={{
-                  backgroundSize: "contain",
-                }}
-              />)
-            }
-              
+            >
+              {image !== "" ? (
+                <Image
+                  src={image}
+                  alt="nft image"
+                  style={{
+                    backgroundSize: "contain",
+                    width: 250,
+                    height: 250,
+                    objectFit: "contain",
+                    background: "#fff",
+                    border: "1px solid #eee",
+                    borderRadius: "20px",
+                  }}
+                />
+              ) : (
+                <Image
+                  src={"/image/preview.png"}
+                  alt="nft image"
+                  style={{
+                    backgroundSize: "contain",
+                  }}
+                />
+              )}
             </div>
             <div className={styles.card_body}>
               <Text

@@ -2,7 +2,6 @@
 import { Button, Card, Image, Text } from "@chakra-ui/react";
 import React from "react";
 import styles from "../styles/slider.module.scss";
-import Link from "next/link";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -35,71 +34,18 @@ const Slider1 = () => {
 
   return (
     <div className={styles.container}>
-      {/* <div style={{ width: "50vw" }}>
-        <Text className={styles.heading}>
-          Discover the unique digital art of NFT
-        </Text>
-        <Text>
-          Digital marketplace for crypto collectibles and non-fungible tokens.
-        </Text>
-        <Text>Buy, sell, and discover exclusive digital assets.</Text>
-        <div>
-          <Button
-            className={styles.btn}
-            style={{ background: "white", width: "150px" }}
-          >
-            Explore
-          </Button>
-          <Link href="/createNewNFT">
-            <Button
-              className={styles.btn}
-              style={{ background: "#3a9bfc", width: "150px", color: "white" }}
-            >
-              Create
-            </Button>
-          </Link>
-        </div>
-      </div> */}
       <div className={styles["btn_group"]}>
         <div>
-          <Button
-            className={`${styles.btn} ${styles.btn1}`} 
-          >
-            All
-          </Button>
-          <Button
-            className={styles.btn}
-          >
-            Art
-          </Button>
-          <Button
-            className={styles.btn}
-          >
-            Gaming
-          </Button>
-          <Button
-            className={styles.btn}
-          >
-            Memberships
-          </Button>
-          <Button
-            className={styles.btn}
-          >
-            PFPs
-          </Button>
-          <Button
-            className={styles.btn}
-          >
-            Photography
-          </Button>
-          <Button
-            className={styles.btn}
-          >
-            Music
-          </Button>
+          <Button className={`${styles.btn} ${styles.btn1}`}>All</Button>
+          <Button className={styles.btn}>Art</Button>
+          <Button className={styles.btn}>Gaming</Button>
+          <Button className={styles.btn}>Memberships</Button>
+          <Button className={styles.btn}>PFPs</Button>
+          <Button className={styles.btn}>Photography</Button>
+          <Button className={styles.btn}>Music</Button>
         </div>
       </div>
-      <div style={{ width: "100%", paddingBottom:"20px" }}>
+      <div style={{ width: "100%", paddingBottom: "20px" }}>
         <Slider {...settings}>
           <div>
             <Card
@@ -151,7 +97,7 @@ const Slider1 = () => {
                     fontSize: "16px",
                   }}
                 >
-                 Satoshibles: Beary Christmas 
+                  Satoshibles: Beary Christmas
                 </Text>
                 <Text
                   style={{
@@ -169,7 +115,7 @@ const Slider1 = () => {
           <div>
             <Card
               className={styles.card}
-              style={{ borderRadius: "20px", width: "320px",   padding: "0" }}
+              style={{ borderRadius: "20px", width: "320px", padding: "0" }}
             >
               <Image
                 src="/image/slider4.webp"
@@ -193,7 +139,7 @@ const Slider1 = () => {
                     fontSize: "14px",
                   }}
                 >
-                   Floor: 0.2 ETH
+                  Floor: 0.2 ETH
                 </Text>
               </div>
             </Card>
@@ -207,7 +153,12 @@ const Slider1 = () => {
               <Image
                 src="/image/slider7.avif"
                 alt=""
-                style={{ borderRadius: "20px", width: "320px", height:"320px", objectFit:"cover" }}
+                style={{
+                  borderRadius: "20px",
+                  width: "320px",
+                  height: "320px",
+                  objectFit: "cover",
+                }}
                 className={styles.image}
               />
               <div className={styles.text}>

@@ -1,6 +1,7 @@
 import styles from "../styles/globals.module.scss";
 import { SearchProvider } from "../components/SearchContext";
 import { ChakraProvider } from "@chakra-ui/react";
+import '../styles/main.scss'; 
 export default function RootLayout({
   children,
 }: {

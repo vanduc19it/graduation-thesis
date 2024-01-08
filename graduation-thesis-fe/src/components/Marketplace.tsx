@@ -6,8 +6,12 @@ import { Button, Card, Image, Spinner, Text, useToast } from "@chakra-ui/react";
 import { FaGamepad, FaRegHeart } from "react-icons/fa";
 import { ethers } from "ethers";
 import { BsCart4 } from "react-icons/bs";
-import { ImPriceTags } from "react-icons/im";
-import { AiFillDollarCircle, AiOutlineCodepenCircle, AiOutlineEye, AiOutlineMore, AiOutlineSmile } from "react-icons/ai";
+import {
+  AiOutlineCodepenCircle,
+  AiOutlineEye,
+  AiOutlineMore,
+  AiOutlineSmile,
+} from "react-icons/ai";
 import MarketplaceAbi from "../datasmc/abi/marketplaceAbi.json";
 import MarketplaceAddress from "../datasmc/address/marketplaceAddress.json";
 import NFTAbi from "../datasmc/abi/nftAbi.json";
@@ -18,21 +22,20 @@ import axios from "axios";
 import { SearchContext } from "./SearchContext";
 import { IoIosMusicalNotes } from "react-icons/io";
 import { MdDraw, MdOndemandVideo } from "react-icons/md";
-import { CiMenuKebab } from "react-icons/ci";
+import convertEthToUsd from "../utils/covertCurrency"
 
 declare var window: any;
 
 const Marketplace = () => {
-  const {isLoggedIn, handleConnect1, searchQuery } = useContext(SearchContext);
+  const { isLoggedIn, handleConnect1, searchQuery } = useContext(SearchContext);
   const [nfts, setNFTs] = useState([]);
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
   const [transactionHash, setTransactionHash] = useState<string>("");
-
-  const providerRPCURL:string =  "https://polygon-mumbai.infura.io/v3/4cd2c1a8018646908347fb2223053b30";
-  
+  const [usdPrice, setUsdPrice] = useState(0)
+  const providerRPCURL: string =
+    "https://polygon-mumbai.infura.io/v3/4cd2c1a8018646908347fb2223053b30";
 
   const loadMarketplaceItems = async () => {
-    
     try {
       const provider = new ethers.providers.JsonRpcProvider(providerRPCURL);
 
@@ -45,102 +48,58 @@ const Marketplace = () => {
 
       if (nft && marketplace) {
         const marketplaceItem = await marketplace.getAvailableItems();
-        console.log(marketplaceItem)
+        console.log(marketplaceItem);
 
-          const results:any = await Promise.all(
-            marketplaceItem.map(async (item:any) => {
-              try {
-                const uri = await nft.tokenURI(item.tokenId);
-                const response = await fetch(uri);
-                const metadata = await response.json();
-                const totalPrice = await marketplace.getTotalPrice(
-                  item.itemId
-                );
-                return {
-                  totalPrice,
-                  itemId: item.itemId.toNumber(),
-                  seller: item.seller,
-                  name: metadata.name,
-                  description: metadata.description,
-                  image: metadata.image,
-                  price: metadata.price,
-                  owner: MarketplaceAddress.address,
-                };
-              } catch (error) {
-                console.error(error); 
-                return null;
-              }
-            })
-          );
-          const filteredItems:any = results.filter((item:any) => item !== null);
-          setNFTs(filteredItems);
-          localStorage.setItem("nftsData", JSON.stringify(filteredItems));
-        
-       
-        // const itemCount = await marketplace.itemCount();
+        const results: any = await Promise.all(
+          marketplaceItem.map(async (item: any) => {
+            try {
+              const uri = await nft.tokenURI(item.tokenId);
+              const response = await fetch(uri);
+              const metadata = await response.json();
+              const totalPrice = await marketplace.getTotalPrice(item.itemId);
+              const usdPrice = await convertEthToUsd(Number(metadata.price))
+              return {
+                totalPrice,
+                itemId: item.itemId.toNumber(),
+                seller: item.seller,
+                name: metadata.name,
+                description: metadata.description,
+                image: metadata.image,
+                price: metadata.price,
+                owner: MarketplaceAddress.address,
+                usdPrice: usdPrice,
+              };
+            } catch (error) {
+              console.error(error);
+              return null;
+            }
+          })
+        );
+        const filteredItems: any = results.filter((item: any) => item !== null);
+        setNFTs(filteredItems);
+        localStorage.setItem("nftsData", JSON.stringify(filteredItems));
 
-        // const itemPromises = Array.from({ length: itemCount }, (_, i) =>
-        //   marketplace.items(i + 1)
-        // ).map(async (item) => {
-
-        //   console.log("HELLO")
-        //   try {
-        //     const itemPromise: any = await item;
-        //     console.log(itemPromise);
-        //     if (!itemPromise.sold) {
-        //       const uri = await nft.tokenURI(itemPromise.tokenId);
-        //       const response = await fetch(uri);
-        //       const metadata = await response.json();
-        //       const totalPrice = await marketplace.getTotalPrice(
-        //         itemPromise.itemId
-        //       );
-        //       const owner = await nft.ownerOf(itemPromise.itemId.toNumber());
-    
-        //       return {
-        //         totalPrice,
-        //         itemId: itemPromise.itemId.toNumber(),
-        //         seller: itemPromise.seller,
-        //         name: metadata.name,
-        //         description: metadata.description,
-        //         image: metadata.image,
-        //         price: metadata.price,
-        //         owner,
-        //       };
-        //     }
-        //     return null;
-        //   } catch (error) {
-        //     console.error("Error processing item:", error);
-        //     return null;
-        //   }
-        // });
-
-        // const items = await Promise.all(itemPromises);
-        // console.log(items,"items")
-        // const filteredItems:any = items.filter((item) => item !== null);
       }
     } catch (error) {
       console.error("Error loading marketplace items:", error);
     }
   };
 
-
   useEffect(() => {
     const nftData: any = localStorage.getItem("nftsData");
     const nftsFromLocalStorage = nftData ? JSON.parse(nftData) : [];
     setNFTs(nftsFromLocalStorage);
     loadMarketplaceItems();
-    
+
     //connect metamsk check
     const addressData: any = localStorage.getItem("address");
     if (addressData?.length > 0) {
-      handleConnect1(true); 
+      handleConnect1(true);
     }
   }, []);
 
-
   const handleBuyNFT = async (item: any) => {
     try {
-
       setLoadingMap((prevLoadingMap) => ({
         ...prevLoadingMap,
         [item.itemId]: true,
@@ -154,7 +113,6 @@ const Marketplace = () => {
         signer
       );
 
-
       const tx = await (
         await marketplace.purchaseItem(item.itemId, { value: item.totalPrice })
       ).wait();
@@ -166,17 +124,16 @@ const Marketplace = () => {
           [item.itemId]: false,
         }));
         loadMarketplaceItems();
-      } 
-        // const removeNftsMarketplace:any = nfts.filter((nft:any)=> nft.itemId !== item.itemId);
-        // setNFTs(removeNftsMarketplace);
-
+      }
+      // const removeNftsMarketplace:any = nfts.filter((nft:any)=> nft.itemId !== item.itemId);
+      // setNFTs(removeNftsMarketplace);
     } catch (error) {
       console.error("Error buying NFT:", error);
       setLoadingMap((prevLoadingMap) => ({
         ...prevLoadingMap,
         [item.itemId]: false,
       }));
-    } 
+    }
   };
 
   useEffect(() => {
@@ -196,44 +153,46 @@ const Marketplace = () => {
 
   const toast = useToast();
 
-  const handleLikeNFT = async (item:any) =>{
-    if(isLoggedIn) {
+  const handleLikeNFT = async (item: any) => {
+    if (isLoggedIn) {
       const addressData: any = localStorage.getItem("address");
 
       try {
-            const response = await axios.post(`http://localhost:5000/add_favorite/${addressData}`,item);
-            console.log(response.data);
-            toast({
-              title: 'Success',
-              description: 'Add item favorited successfully !',
-              status: 'success',
-              duration: 2000,
-              isClosable: true,
-              position: 'top',
-            });
-          } catch (error) {
-            console.error('Error adding to favorites:', error);
-            toast({
-              title: 'Info',
-              description: 'You already liked item !',
-              status: 'info',
-              duration: 2000,
-              isClosable: true,
-              position: 'top',
-            });
+        const response = await axios.post(
+          `http://localhost:5000/add_favorite/${addressData}`,
+          item
+        );
+        console.log(response.data);
+        toast({
+          title: "Success",
+          description: "Add item favorited successfully !",
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+          position: "top",
+        });
+      } catch (error) {
+        console.error("Error adding to favorites:", error);
+        toast({
+          title: "Info",
+          description: "You already liked item !",
+          status: "info",
+          duration: 2000,
+          isClosable: true,
+          position: "top",
+        });
       }
     } else {
       toast({
-        title: 'Warning',
-        description: 'Please login to like items !',
-        status: 'warning',
+        title: "Warning",
+        description: "Please login to like items !",
+        status: "warning",
         duration: 2000,
         isClosable: true,
-        position: 'top',
+        position: "top",
       });
     }
-   
-  }
+  };
 
   const handleAddToCart = (cartItem: any) => {
     // Lấy giỏ hàng từ localStorage nếu có, hoặc khởi tạo một mảng rỗng
@@ -243,25 +202,24 @@ const Marketplace = () => {
     // Lưu giỏ hàng mới vào localStorage
     localStorage.setItem("cartItems", JSON.stringify(existingCart));
     toast({
-      title: 'Success',
-      description: 'Add item to successfully !',
-      status: 'success',
+      title: "Success",
+      description: "Add item to successfully !",
+      status: "success",
       duration: 2000,
       isClosable: true,
-      position: 'top',
+      position: "top",
     });
-}
+  };
 
 
   return (
     <>
-      
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems:"center",
-          marginTop:"60px"
+          alignItems: "center",
+          marginTop: "60px",
         }}
       >
         <div className={styles.heading}>Explore Items 🚀</div>
@@ -271,10 +229,10 @@ const Marketplace = () => {
               background: "transparent",
               color: "black",
               marginRight: "10px",
-              borderRadius:"20px"
+              borderRadius: "20px",
             }}
           >
-            <MdDraw style={{ marginRight: "4px" }}/>
+            <MdDraw style={{ marginRight: "4px" }} />
             Art
           </Button>
           <Button
@@ -282,11 +240,10 @@ const Marketplace = () => {
               background: "transparent",
               color: "black",
               marginRight: "10px",
-              borderRadius:"20px"
+              borderRadius: "20px",
             }}
           >
-            <FaGamepad style={{ marginRight: "4px" }}/>
-
+            <FaGamepad style={{ marginRight: "4px" }} />
             Games
           </Button>
           <Button
@@ -294,10 +251,10 @@ const Marketplace = () => {
               background: "transparent",
               color: "black",
               marginRight: "10px",
-              borderRadius:"20px"
+              borderRadius: "20px",
             }}
           >
-            <IoIosMusicalNotes style={{ marginRight: "4px" }}/>
+            <IoIosMusicalNotes style={{ marginRight: "4px" }} />
             Music
           </Button>
           <Button
@@ -305,7 +262,7 @@ const Marketplace = () => {
               background: "transparent",
               color: "black",
               marginRight: "10px",
-              borderRadius:"20px"
+              borderRadius: "20px",
             }}
           >
             <BiCategory style={{ marginRight: "4px" }} />
@@ -316,10 +273,10 @@ const Marketplace = () => {
               background: "transparent",
               color: "black",
               marginRight: "10px",
-              borderRadius:"20px"
+              borderRadius: "20px",
             }}
           >
-            <AiOutlineCodepenCircle style={{ marginRight: "4px" }}/>
+            <AiOutlineCodepenCircle style={{ marginRight: "4px" }} />
             3D Model
           </Button>
           <Button
@@ -327,10 +284,10 @@ const Marketplace = () => {
               background: "transparent",
               color: "black",
               marginRight: "10px",
-              borderRadius:"20px"
+              borderRadius: "20px",
             }}
           >
-            <AiOutlineSmile style={{ marginRight: "4px" }}/>
+            <AiOutlineSmile style={{ marginRight: "4px" }} />
             Memes
           </Button>
           <Button
@@ -338,15 +295,22 @@ const Marketplace = () => {
               background: "transparent",
               color: "black",
               marginRight: "10px",
-              borderRadius:"20px"
+              borderRadius: "20px",
             }}
           >
-            <MdOndemandVideo style={{ marginRight: "4px" }}/>
+            <MdOndemandVideo style={{ marginRight: "4px" }} />
             Videos
           </Button>
         </div>
         <div>
-          <Button style={{ borderRadius:"20px",background:"transparent", border:"2px solid #ae4cff", color:"#ae4cff" }}>
+          <Button
+            style={{
+              borderRadius: "20px",
+              background: "transparent",
+              border: "2px solid #ae4cff",
+              color: "#ae4cff",
+            }}
+          >
             <AiOutlineEye style={{ marginRight: "4px" }} />
             View All Items
           </Button>
@@ -363,8 +327,23 @@ const Marketplace = () => {
               }}
               key={id}
             >
-              <div style={{display:"flex",width:"36px", height:"36px",borderRadius:"50px",background:"rgba(255,255,255,0.5)", position:"absolute", right:"30px", top: "30px", alignItems:"center", justifyContent:"center"}}>
-              <AiOutlineMore  style={{color:"rgba(0, 0, 0, 0.7)", fontSize:"20px"}}/>
+              <div
+                style={{
+                  display: "flex",
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "50px",
+                  background: "rgba(255,255,255,0.5)",
+                  position: "absolute",
+                  right: "30px",
+                  top: "30px",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <AiOutlineMore
+                  style={{ color: "rgba(0, 0, 0, 0.7)", fontSize: "20px" }}
+                />
               </div>
               <Link
                 href={`/productDetail/${ethers.BigNumber.from(
@@ -381,7 +360,7 @@ const Marketplace = () => {
                     objectFit: "contain",
                     background: "#fff",
                     border: "1px solid #eee",
-                    borderRadius:"10px"
+                    borderRadius: "10px",
                   }}
                   className={styles.image_nft}
                 />
@@ -402,7 +381,10 @@ const Marketplace = () => {
                     {item.name}
                   </Text>
                 </Link>
-                <Text style={{ fontWeight: "600", color: "#484848" }} onClick={()=> handleLikeNFT(item)}>
+                <Text
+                  style={{ fontWeight: "600", color: "#484848" }}
+                  onClick={() => handleLikeNFT(item)}
+                >
                   <FaRegHeart />
                 </Text>
               </div>
@@ -416,7 +398,7 @@ const Marketplace = () => {
                       marginTop: "-5px",
                     }}
                   >
-                    Price
+                    Price 
                   </Text>
                   <Text
                     style={{
@@ -425,11 +407,11 @@ const Marketplace = () => {
                       fontWeight: "600",
                     }}
                   >
-                    {item.price} ETH
+                   {item.price} ETH 
                   </Text>
+                  <Text style={{color:"#aaa", fontWeight:"400", fontSize:"13px"}}>(${item?.usdPrice?.toFixed(2)})</Text>
                 </div>
                 <div>
-               
                   <Button
                     onClick={() => handleBuyNFT(item)}
                     style={{
@@ -437,7 +419,7 @@ const Marketplace = () => {
                       color: "#fff",
                       width: "130px",
                       marginRight: "5px",
-                      borderRadius:"20px"
+                      borderRadius: "20px",
                     }}
                   >
                     {!loadingMap[item.itemId] ? (
@@ -451,32 +433,19 @@ const Marketplace = () => {
                   </Button>
 
                   <Button
-                  style={{
-                    background: "linear-gradient(to right, #D01498,#647ECB)",
-                    color: "#fff",
-                    padding:"10px 10px",
-                    borderRadius:"10px",
-                    marginLeft:"4px"
-                  }}
-                  onClick={()=>handleAddToCart(item)}
-                >
-                  <BsCart4 size={20} style={{ marginRight: "2px" }} />
-                  
-                </Button>
+                    style={{
+                      background: "linear-gradient(to right, #D01498,#647ECB)",
+                      color: "#fff",
+                      padding: "10px 10px",
+                      borderRadius: "10px",
+                      marginLeft: "4px",
+                    }}
+                    onClick={() => handleAddToCart(item)}
+                  >
+                    <BsCart4 size={20} style={{ marginRight: "2px" }} />
+                  </Button>
                 </div>
               </div>
-              {/* <div className={styles.button_buy}>
-                <Button
-                  style={{
-                    background: "linear-gradient(to right, #D01498,#647ECB)",
-                    color: "#fff",
-                    width: "160px",
-                  }}
-                >
-                  <BsCart4 size={20} style={{ marginRight: "2px" }} />
-                  ADD TO CART
-                </Button>
-              </div> */}
             </Card>
           ))}
       </div>
