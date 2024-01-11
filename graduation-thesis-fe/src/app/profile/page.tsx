@@ -24,7 +24,6 @@ import {
   Tabs,
   Text,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import styles from "../../styles/profile.module.scss";
@@ -51,6 +50,7 @@ import Link from "next/link";
 import { MdOutlineEdit } from "react-icons/md";
 import { BiUpload } from "react-icons/bi";
 import { AiOutlineEllipsis } from "react-icons/ai";
+import { toast } from 'react-toastify';
 
 const Profile = () => {
   interface NFT {
@@ -285,9 +285,6 @@ const Profile = () => {
   const [endTime, setEndTime1] = useState(Date.now() + 1200000000);
   const [endTime1, setEndTime2] = useState(Date.now() + 500000000);
   const [endTime2, setEndTim3] = useState(Date.now() + 800000000);
-  //  const handleReset = () => {
-  //   setEndTime(Date.now() + 5000);
-  // };
 
   const [imageNFTAuction, setImageNFTAuction] = useState("");
   const [timeExpireAuction, setTimeExpireAuction] = useState("");
@@ -450,7 +447,6 @@ const Profile = () => {
   const [loadingImage, setLoadingImage] = useState(false);
   const [loadingImage1, setLoadingImage1] = useState(false);
 
-  const toast = useToast();
 
   const handleFileChange = async (e: any) => {
     const file = e.target.files[0];
@@ -481,14 +477,17 @@ const Profile = () => {
             console.log(response.data);
             await handleGetUser(address);
             setLoadingImage(false);
-            toast({
-              title: "Update profile",
-              description: "Successfully updated profile picture!",
-              status: "success",
-              duration: 2000,
-              isClosable: true,
-              position: "top",
-            });
+
+            toast.success('Successfully updated profile picture!', {
+              position: "top-center",
+              autoClose: 2000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+              });
           } catch (error) {
             console.error(error);
           }
@@ -528,14 +527,18 @@ const Profile = () => {
             console.log(response.data);
             await handleGetUser(address);
             setLoadingImage1(false);
-            toast({
-              title: "Update profile",
-              description: "Your cover picture has been updated successfully!",
-              status: "success",
-              duration: 2000,
-              isClosable: true,
-              position: "top",
-            });
+
+            toast.success('Your cover picture has been updated successfully!', {
+              position: "top-center",
+              autoClose: 2000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light",
+              });
+
           } catch (error) {
             console.error(error);
           }
@@ -565,14 +568,16 @@ const Profile = () => {
       console.log(response.data);
       await handleGetUser(address);
       onCloseModalName();
-      toast({
-        title: "Update profile",
-        description: "Successfully updated username!",
-        status: "success",
-        duration: 2000,
-        isClosable: true,
-        position: "top",
-      });
+      toast.success('Successfully updated username!', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
     } catch (error) {
       console.error(error);
     }

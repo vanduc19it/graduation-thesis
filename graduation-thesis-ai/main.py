@@ -252,6 +252,80 @@ def get_user(wallet_address):
         app.logger.error(f'Error fetching user: {str(e)}')
         return jsonify({'error': 'Internal server error'}), 500
 
+@app.route('/add_to_cart/<string:wallet_address>', methods=['POST'])
+def add_to_cart(wallet_address):
+    data = request.get_json()
+    item_info = {
+        'description': data.get('description'),
+        'image': data.get('image'),
+        'itemId': data.get('itemId'),
+        'name': data.get('name'),
+        'owner': data.get('owner'),
+        'price': data.get('price'),
+        'seller': data.get('seller')
+    }
+
+    # Tìm người dùng theo địa chỉ ví
+    user_cart = db.carts.find_one({'wallet_address': wallet_address})
+
+    if not user_cart:
+        # Nếu người dùng chưa có giỏ hàng, tạo một giỏ hàng mới
+        user_cart = {'wallet_address': wallet_address, 'cart': []}
+
+    # Kiểm tra xem item đã được thêm vào giỏ hàng chưa
+    if item_info not in user_cart['cart']:
+        # Thêm thông tin item vào mảng cart
+        user_cart['cart'].append(item_info)
+
+        # Cập nhật hoặc thêm giỏ hàng vào cơ sở dữ liệu
+        db.carts.update_one({'wallet_address': wallet_address}, {'$set': user_cart}, upsert=True)
+
+        return jsonify({'message': 'Item added to cart successfully'}), 200
+    else:
+        return jsonify({'error': 'Item already in cart'}), 400
+    
+# Route để lấy thông tin giỏ hàng dựa trên địa chỉ ví
+@app.route('/get_cart/<string:wallet_address>', methods=['GET'])
+def get_cart(wallet_address):
+    # Tìm giỏ hàng dựa trên địa chỉ ví
+    user_cart = db.carts.find_one({'wallet_address': wallet_address})
+
+    if user_cart:
+        # Nếu giỏ hàng tồn tại, trả về thông tin giỏ hàng
+        return jsonify({'cart': user_cart['cart']}), 200
+    else:
+        # Nếu không tìm thấy giỏ hàng, trả về thông báo lỗi
+        return jsonify({'error': 'Cart not found'}), 404
+    
+@app.route('/clear_cart/<string:wallet_address>', methods=['DELETE'])
+def clear_cart(wallet_address):
+    # Tìm giỏ hàng dựa trên địa chỉ ví
+    user_cart = db.carts.find_one({'wallet_address': wallet_address})
+
+    if user_cart:
+        db.carts.update_one({'wallet_address': wallet_address}, {'$set': {'cart': []}})
+
+        return jsonify({'message': 'Cart cleared successfully'}), 200
+    else:
+        return jsonify({'error': 'Cart not found'}), 404
+    
+# Route để xóa một mục từ giỏ hàng dựa trên địa chỉ ví và itemId
+@app.route('/remove_from_cart/<string:wallet_address>/<int:item_id>', methods=['DELETE'])
+def remove_from_cart(wallet_address, item_id):
+    # Tìm giỏ hàng dựa trên địa chỉ ví
+    user_cart = db.carts.find_one({'wallet_address': wallet_address})
+
+    if user_cart:
+        # Lọc ra mục cần xóa từ giỏ hàng
+        updated_cart = [item for item in user_cart['cart'] if item['itemId'] != item_id]
+        db.carts.update_one({'wallet_address': wallet_address}, {'$set': {'cart': updated_cart}})
+
+        return jsonify({'message': 'Item removed from cart successfully'}), 200
+    else:
+        return jsonify({'error': 'Cart not found'}), 404
+
+
+
 
 model1 = load_model('chatbot_model.h5')
 words = pickle.load(open('words.pkl', 'rb'))

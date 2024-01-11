@@ -15,12 +15,14 @@ import Fade from "react-reveal/Fade";
 import Flip from "react-reveal/Flip";
 import { useState } from "react";
 import styles from "../styles/app.module.scss"
+
 export default function Home() {
 
   const [showBot, toggleBot] = useState(false);
 
   return (
     <main  style={{position:"relative"}}>
+
       <Header />
       {/* <TrendingCollection /> */}
       <Auction />

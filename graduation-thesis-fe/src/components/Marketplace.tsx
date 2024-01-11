@@ -2,7 +2,7 @@
 "use client";
 import React, { useEffect, useState, useContext } from "react";
 import styles from "../styles/marketplace.module.scss";
-import { Button, Card, Image, Spinner, Text, useToast } from "@chakra-ui/react";
+import { Button, Card, Image, Spinner, Text } from "@chakra-ui/react";
 import { FaGamepad, FaRegHeart } from "react-icons/fa";
 import { ethers } from "ethers";
 import { BsCart4 } from "react-icons/bs";
@@ -22,16 +22,18 @@ import axios from "axios";
 import { SearchContext } from "./SearchContext";
 import { IoIosMusicalNotes } from "react-icons/io";
 import { MdDraw, MdOndemandVideo } from "react-icons/md";
-import convertEthToUsd from "../utils/covertCurrency"
+import convertEthToUsd from "../utils/covertCurrency";
+
+import { toast } from 'react-toastify';
 
 declare var window: any;
 
 const Marketplace = () => {
-  const { isLoggedIn, handleConnect1, searchQuery } = useContext(SearchContext);
+  const { isLoggedIn, handleConnect1, searchQuery, addToCart } = useContext(SearchContext);
   const [nfts, setNFTs] = useState([]);
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
   const [transactionHash, setTransactionHash] = useState<string>("");
-  const [usdPrice, setUsdPrice] = useState(0)
+  const [usdPrice, setUsdPrice] = useState(0);
   const providerRPCURL: string =
     "https://polygon-mumbai.infura.io/v3/4cd2c1a8018646908347fb2223053b30";
 
@@ -57,7 +59,7 @@ const Marketplace = () => {
               const response = await fetch(uri);
               const metadata = await response.json();
               const totalPrice = await marketplace.getTotalPrice(item.itemId);
-              const usdPrice = await convertEthToUsd(Number(metadata.price))
+              const usdPrice = await convertEthToUsd(Number(metadata.price));
               return {
                 totalPrice,
                 itemId: item.itemId.toNumber(),
@@ -78,7 +80,6 @@ const Marketplace = () => {
         const filteredItems: any = results.filter((item: any) => item !== null);
         setNFTs(filteredItems);
         localStorage.setItem("nftsData", JSON.stringify(filteredItems));
-
       }
     } catch (error) {
       console.error("Error loading marketplace items:", error);
@@ -151,7 +152,7 @@ const Marketplace = () => {
 
   console.log(nfts);
 
-  const toast = useToast();
+
 
   const handleLikeNFT = async (item: any) => {
     if (isLoggedIn) {
@@ -162,55 +163,123 @@ const Marketplace = () => {
           `http://localhost:5000/add_favorite/${addressData}`,
           item
         );
-        console.log(response.data);
-        toast({
-          title: "Success",
-          description: "Add item favorited successfully !",
-          status: "success",
-          duration: 2000,
-          isClosable: true,
-          position: "top",
-        });
+      
+        toast.success('Add item favorited successfully !', {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          });
       } catch (error) {
         console.error("Error adding to favorites:", error);
-        toast({
-          title: "Info",
-          description: "You already liked item !",
-          status: "info",
-          duration: 2000,
-          isClosable: true,
-          position: "top",
+        
+      toast.info('You already liked item !', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
         });
       }
     } else {
-      toast({
-        title: "Warning",
-        description: "Please login to like items !",
-        status: "warning",
-        duration: 2000,
-        isClosable: true,
-        position: "top",
-      });
+     
+
+      toast.warning('Please login to like items !', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
+      
     }
   };
 
   const handleAddToCart = (cartItem: any) => {
-    // Lấy giỏ hàng từ localStorage nếu có, hoặc khởi tạo một mảng rỗng
-    const existingCart = JSON.parse(localStorage.getItem("cartItems") || "[]");
-    // Thêm mục mới vào giỏ hàng
-    existingCart.push(cartItem);
-    // Lưu giỏ hàng mới vào localStorage
-    localStorage.setItem("cartItems", JSON.stringify(existingCart));
-    toast({
-      title: "Success",
-      description: "Add item to successfully !",
-      status: "success",
-      duration: 2000,
-      isClosable: true,
-      position: "top",
-    });
+
+      addToCart(true);
+  
+      const addressData: any = localStorage.getItem("address");
+
+      if(addressData?.length > 0) {
+          saveCartToDatabase(addressData, cartItem);
+      } else {
+        const existingCart = JSON.parse(localStorage.getItem("cartItems") || "[]");
+        const isItemInCart = existingCart.some(
+          (item: any) => item.itemId === cartItem.itemId
+        );
+        if (!isItemInCart) {
+          existingCart.push(cartItem);
+          localStorage.setItem("cartItems", JSON.stringify(existingCart));
+          toast.success('Add item to cart successfully !', {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            });
+        } else {
+          toast.info('You already added this item to cart!', {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            });
+          
+        }    
+      } 
   };
 
+  const saveCartToDatabase = async (walletAddress:any, item:any) => {
+    try {
+      const response = await axios.post(`http://localhost:5000/add_to_cart/${walletAddress}`, item);
+  
+      if (response.status === 200) {
+      
+        toast.success('Add item to cart successfully !', {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          });
+      } else {
+        console.error('Failed to add item to cart:', response.data.error);
+      }
+    } catch (error:any) {
+     
+      toast.info('You already added this item to cart!', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
+    }
+  };
 
   return (
     <>
@@ -339,6 +408,7 @@ const Marketplace = () => {
                   top: "30px",
                   alignItems: "center",
                   justifyContent: "center",
+                  zIndex:10
                 }}
               >
                 <AiOutlineMore
@@ -398,7 +468,7 @@ const Marketplace = () => {
                       marginTop: "-5px",
                     }}
                   >
-                    Price 
+                    Price
                   </Text>
                   <Text
                     style={{
@@ -407,9 +477,17 @@ const Marketplace = () => {
                       fontWeight: "600",
                     }}
                   >
-                   {item.price} ETH 
+                    {item.price} ETH
                   </Text>
-                  <Text style={{color:"#aaa", fontWeight:"400", fontSize:"13px"}}>(${item?.usdPrice?.toFixed(2)})</Text>
+                  <Text
+                    style={{
+                      color: "#aaa",
+                      fontWeight: "400",
+                      fontSize: "13px",
+                    }}
+                  >
+                    (${item?.usdPrice})
+                  </Text>
                 </div>
                 <div>
                   <Button
@@ -426,7 +504,7 @@ const Marketplace = () => {
                       " Purchase ⚡"
                     ) : (
                       <>
-                        <Text style={{ marginRight: "4px" }}>BUYING NFT</Text>{" "}
+                        <Text style={{ marginRight: "4px" }}>Purchasing</Text>{" "}
                         <Spinner size="sm" />
                       </>
                     )}

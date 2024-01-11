@@ -11,10 +11,6 @@ import {
   FormLabel,
   Image,
   Input,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -31,7 +27,6 @@ import {
   Text,
   Textarea,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import React, { useEffect, useState, useContext } from "react";
 import { ethers } from "ethers";
@@ -42,7 +37,7 @@ import NFTAddress from "@/datasmc/address/nftAddress.json";
 import { FaEye, FaRegHeart } from "react-icons/fa";
 import { SearchContext } from "@/components/SearchContext";
 import { useRouter } from "next/navigation";
-import { MdKeyboardArrowDown } from "react-icons/md";
+import { toast } from 'react-toastify';
 
 declare var window: any;
 
@@ -54,10 +49,14 @@ const CreateNewNFT = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
-  const toast = useToast();
+  const [isChecked, setIsChecked] = useState(false);
+
+  const handleCheckboxChange = () => {
+    setIsChecked(!isChecked);
+  };
 
   useEffect(() => {
-    console.log(process.env.NEXT_PUBLIC_TOKEN_NFTSTORAGE)
+    console.log(process.env.NEXT_PUBLIC_TOKEN_NFTSTORAGE);
     const addressData: any = localStorage.getItem("address");
     if (addressData?.length > 0) {
       handleConnect1(true);
@@ -81,7 +80,6 @@ const CreateNewNFT = () => {
       event.preventDefault();
       const file: any = event.target.files[0];
       setFileImage(file);
-
       const reader: any = new FileReader();
       reader.readAsArrayBuffer(file);
       reader.onload = () => {
@@ -102,85 +100,137 @@ const CreateNewNFT = () => {
 
   const createNFT = async () => {
     if (!isLoggedIn) {
-      alert("Vui lòng kết nối ví metamask! ");
+      toast.info('Please connect metamask wallet!', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
     } else {
       const nftstorage = new NFTStorage({
-        token: `${process.env.NEXT_PUBLIC_TOKEN_NFTSTORAGE}` ??
-          "",
+        token: `${process.env.NEXT_PUBLIC_TOKEN_NFTSTORAGE}` ?? "",
       });
 
       if (imageBuffer && name != "" && description != "") {
         if (price > 0) {
           try {
-            setLoading(true);
+            if(isChecked) {
+              setLoading(true);
 
-            const formData = new FormData();
-            formData.append("file", fileImage);
+              const formData = new FormData();
+              formData.append("file", fileImage);
 
-            const response = await fetch(
-              "http://localhost:5000/detect_copy_nft",
-              {
-                method: "POST",
-                body: formData,
-              }
-            );
+              toast.promise(
+                fetch("http://localhost:5000/detect_copy_nft", {
+                  method: "POST",
+                  body: formData,
+                }), {
+                  pending: 'Checking for duplicate NFT...',
+                }
+              );
+  
+              const response = await fetch(
+                "http://localhost:5000/detect_copy_nft",
+                {
+                  method: "POST",
+                  body: formData,
+                }
+              );
 
-            const data = await response.json();
-            console.log(data, "hello1");
-            const is_copy = data?.is_similar;
-
-            if (!is_copy) {
-              const { ipnft } = await nftstorage.store({
-                name,
-                description,
-                price,
-                image: new File([imageBuffer], "image", { type: "image/png" }),
-              });
-
-              const ipfsURL = `https://ipfs.io/ipfs/${ipnft}/metadata.json`;
-              // mint nft
-              const tx = await (await nft.mint(ipfsURL)).wait();
-
-              if (tx) {
-                setTx(tx?.transactionHash);
-                onOpen();
+  
+              const data = await response.json();
+              const is_copy = data?.is_similar;
+  
+              if (!is_copy) {
+                
+                
+                toast.success('Checked NFT successfully, minting NFT...', {
+                  position: "top-center",
+                  autoClose: 2000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "light",
+                  });
+                const { ipnft } = await nftstorage.store({
+                  name,
+                  description,
+                  price,
+                  image: new File([imageBuffer], "image", { type: "image/png" }),
+                });
+  
+                const ipfsURL = `https://ipfs.io/ipfs/${ipnft}/metadata.json`;
+                // mint nft
+                const tx = await (await nft.mint(ipfsURL)).wait();
+  
+                if (tx) {
+                  setTx(tx?.transactionHash);
+                  onOpen();
+                  setLoading(false);
+                }
+              } else {
+                
+                toast.warn('The system confirms this NFT is a duplicate or fake, please create another nft!', {
+                  position: "top-center",
+                  autoClose: 2000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "light",
+                  });
                 setLoading(false);
               }
             } else {
-              toast({
-                title: "Warning",
-                description:
-                  "Hệ thống xác nhận NFT này là copy trùng lặp hoặc giả mạo, vui lòng tạo một nft khác!",
-                status: "warning",
-                duration: 3000,
-                isClosable: true,
-                position: "top",
-              });
-              setLoading(false);
+              toast.warn('Please agree to terms and condition!', {
+                position: "top-center",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+                });
             }
+       
           } catch (error) {
             console.error("Error:", error);
             setLoading(false);
           }
         } else {
-          toast({
-            title: "Info",
-            description: "Giá nft phải lớn hơn 0!",
-            status: "info",
-            duration: 2000,
-            isClosable: true,
-            position: "top",
-          });
+          toast.info('Item nft price must be greater than 0!', {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            });
+
+          
         }
       } else {
-        toast({
-          title: "Info",
-          description: "Vui lòng nhập đầy đủ thông tin nft !",
-          status: "info",
-          duration: 2000,
-          isClosable: true,
-          position: "top",
-        });
+
+        toast.info('Please provide complete information about the NFT!', {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          });
       }
     }
   };
@@ -194,9 +244,9 @@ const CreateNewNFT = () => {
     }, 4000);
   };
 
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState("");
 
-  const handleCategoryChange = (event:any) => {
+  const handleCategoryChange = (event: any) => {
     setSelectedCategory(event.target.value);
   };
 
@@ -301,26 +351,28 @@ const CreateNewNFT = () => {
                   </NumberInputStepper>
                 </NumberInput>
               </div>
-                            <Box  style={{
-                    width: "48%",
-                    padding: "0px",
-                    marginTop: "44px",
-                    borderRadius: "20px",
-                  }}>
-                    <FormControl>
-                      <Select value={selectedCategory} onChange={handleCategoryChange} >
-                        <option value="category1">Art</option>
-                        <option value="category2">Gaming</option>
-                        <option value="category3">Photography</option>
-                        <option value="category2">Music</option>
-                        <option value="category3">Video</option>
-                        <option value="category3">PFPs</option>
-                        {/* Add more options as needed */}
-                      </Select>
-                    </FormControl>
-
-                
-                  </Box>
+              <Box
+                style={{
+                  width: "48%",
+                  padding: "0px",
+                  marginTop: "44px",
+                  borderRadius: "20px",
+                }}
+              >
+                <FormControl>
+                  <Select
+                    value={selectedCategory}
+                    onChange={handleCategoryChange}
+                  >
+                    <option value="category1">Art</option>
+                    <option value="category2">Gaming</option>
+                    <option value="category3">Photography</option>
+                    <option value="category4">Music</option>
+                    <option value="category5">Video</option>
+                    <option value="category6">PFPs</option>
+                  </Select>
+                </FormControl>
+              </Box>
             </div>
 
             <div
@@ -330,7 +382,7 @@ const CreateNewNFT = () => {
                 justifyContent: "space-between",
               }}
             >
-              <Checkbox mt={4}>I agree to all terms & conditions</Checkbox>
+              <Checkbox mt={4} onChange={handleCheckboxChange} isChecked={isChecked}>I agree to all terms & conditions</Checkbox>
               <Button
                 type="submit"
                 onClick={createNFT}

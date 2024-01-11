@@ -49,7 +49,10 @@
   font-weight: 700;
 }
 
-
 .search::placeholder {
   color: white;
+}
+
+.delete-icon:hover {
+  color: red;
 }

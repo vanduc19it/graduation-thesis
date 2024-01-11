@@ -1,7 +1,6 @@
 /* eslint-disable react/no-children-prop */
 "use client";
 import {
-  Box,
   Button,
   Icon,
   Image,
@@ -26,14 +25,14 @@ import {
   DrawerOverlay,
   DrawerContent,
   DrawerCloseButton,
-  useToast,
+  Badge,
 } from "@chakra-ui/react";
 import Link from "next/link";
 import React, { useContext, useEffect, useState } from "react";
 import { IoIosSearch } from "react-icons/io";
 import { BsCart4 } from "react-icons/bs";
 import { BiUserCircle, BiPencil } from "react-icons/bi";
-import { MdWallet } from "react-icons/md";
+import { MdOutlinePayment, MdWallet } from "react-icons/md";
 import { HiOutlineUser } from "react-icons/hi";
 import { BiCategoryAlt } from "react-icons/bi";
 import { FiLogOut } from "react-icons/fi";
@@ -43,6 +42,10 @@ import { ethers } from "ethers";
 import { SearchContext } from "./SearchContext";
 import { useRouter } from "next/navigation";
 import { MdDelete } from "react-icons/md";
+import convertEthToUsd from "@/utils/covertCurrency";
+import { toast } from 'react-toastify';
+
+
 declare var window: any;
 const Navbar = () => {
   const [provider, setProvider] = useState(null);
@@ -52,8 +55,6 @@ const Navbar = () => {
   const { isLoggedIn, handleConnect1 } = useContext(SearchContext);
   const [login, setLogin] = useState(1);
   const router = useRouter();
-
-  const toast = useToast();
 
   const [checkNavigateProfile, setCheckNavigateProfile] = useState(false);
   const handleConnectWallet = async () => {
@@ -79,14 +80,17 @@ const Navbar = () => {
         handleConnect1(true);
         if (address !== "") {
           handleCreateNewUser(address);
-          toast({
-            title: "Success",
-            description: "Connected wallet successfully!",
-            status: "success",
-            duration: 1000,
-            isClosable: true,
-            position: "top",
-          });
+
+          toast.success('Connected wallet successfully!', {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            });
         }
 
         if (checkNavigateProfile) {
@@ -107,14 +111,17 @@ const Navbar = () => {
     setProvider(null);
     setLogout(logout + 1); //check logout
     handleConnect1(false);
-    toast({
-      title: "Success",
-      description: "You has been logged out successfully!",
-      status: "success",
-      duration: 1000,
-      isClosable: true,
-      position: "top",
-    });
+
+    toast.success('You has been logged out successfully!', {
+      position: "top-center",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      });
   };
 
   useEffect(() => {
@@ -132,7 +139,7 @@ const Navbar = () => {
     onClose: onCloseModal2,
   } = useDisclosure();
 
-  const { handleSearch } = useContext(SearchContext);
+  const { handleSearch, cartCheck, addToCart } = useContext(SearchContext);
   const [searchInput, setSearchInput] = useState("");
 
   const handleKeyDown = (e: any) => {
@@ -181,43 +188,140 @@ const Navbar = () => {
     }
   };
 
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState<any>([]);
   useEffect(() => {
-    // Lấy giỏ hàng từ localStorage nếu có
-    const storedCartItems = JSON.parse(
-      localStorage.getItem("cartItems") || "[]"
+    console.log(isLoggedIn)
+    if (isOpenModal2 || cartCheck || isLoggedIn || !isLoggedIn) {
+      if (address?.length > 0) {
+        handleGetCart();
+      } else {
+      
+        const storedCartItems = JSON.parse(
+          localStorage.getItem("cartItems") || "[]"
+        );
+        setCartItems(storedCartItems);
+      }
+    }
+    addToCart(false);
+  }, [isOpenModal2, cartCheck, isLoggedIn]);
+
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [usdPrice, setUsdPrice] = useState(0);
+
+  // Effect này sẽ chạy mỗi khi cartItems thay đổi
+useEffect(() => {
+  if (cartItems?.length > 0) {
+    const totalPrice = cartItems.reduce((total:number, item:any) => {
+      total += parseFloat(item.price);
+      return total;
+    }, 0);
+
+    setTotalPrice(totalPrice);
+    convertEthToUsd(totalPrice).then((usdPrice:any) => {
+      setUsdPrice(usdPrice);
+    });
+  }
+}, [cartItems]);
+
+  const handleGetCart = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/get_cart/${address}`
+      );
+
+      if (response.status === 200) {
+        setCartItems(response.data.cart);
+      } else {
+        console.error("Failed to get cart:", response.data.error);
+      }
+    } catch (error: any) {
+      console.error("Error get cart:", error.message);
+    }
+  };
+
+  console.log(totalPrice)
+
+  const handleClearAll = async () => {
+    setCartItems([]);
+    localStorage.removeItem("cartItems");
+
+    if (address?.length > 0) {
+      try {
+        const response = await axios.delete(
+          `http://localhost:5000/clear_cart/${address}`
+        );
+
+        if (response.status === 200) {
+          
+        } else {
+          console.error("Failed to clear cart:", response.data.error);
+        }
+      } catch (error: any) {
+        console.error("Error clearing cart:", error.message);
+      }
+    }
+    toast.success('You has been clear all cart successfully!', {
+      position: "top-center",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      });
+  };
+
+  const handleRemoveItemCart = async (item: any) => {
+    const updatedCart = cartItems.filter(
+      (cartItem: any) => cartItem.itemId !== item.itemId
     );
 
-    // Set giỏ hàng vào state
-    setCartItems(storedCartItems);
-  }, [isOpenModal2]);
+    setCartItems(updatedCart);
+    localStorage.setItem("cartItems", JSON.stringify(updatedCart));
 
+    if (address?.length > 0) {
+      console.log(item.itemId);
+      try {
+        const response = await axios.delete(
+          `http://localhost:5000/remove_from_cart/${address}/${item.itemId}`
+        );
 
-  const handleClearAll = () => {
-    // Set giỏ hàng mới vào state
-    setCartItems([]);
-
-    // Xóa toàn bộ giỏ hàng khỏi localStorage
-    localStorage.removeItem("cartItems");
-    toast({
-      title: "Success",
-      description: "You has been clear all cart successfully !",
-      status: "success",
-      duration: 2000,
-      isClosable: true,
-      position: "top",
-    });
+        if (response.status === 200) {
+          toast.success('Remove item from cart successfully!', {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            });
+        } else {
+          console.error(
+            "Failed to remove item from cart:",
+            response.data.error
+          );
+        }
+      } catch (error: any) {
+        console.error("Error remove item cart:", error.message);
+      }
+    }
+    
   };
 
   const handleBuyCart = () => {
-    toast({
-      title: "Error",
-      description: "Complete purchase failed !",
-      status: "error",
-      duration: 2000,
-      isClosable: true,
-      position: "top",
-    });
+    toast.error('Complete purchase failed !', {
+      position: "top-center",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      });
   };
 
   return (
@@ -452,7 +556,29 @@ const Navbar = () => {
               }}
               onClick={onOpenModal2}
             >
-              <BsCart4 size={25} />
+                {cartItems?.length > 0 && ( 
+                <Badge
+                style={{
+                  position: "absolute",
+                  right: 4,
+                  top: 4,
+                  borderRadius: "50%",
+                  background: "#ae4cff",
+                  color: "white",
+                  width: "16px",
+                  height: "16px",
+                  fontWeight: "500",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+               {cartItems?.length}
+              </Badge>
+              )
+                }
+             
+              <BsCart4 size={22} />
             </Button>
           </div>
         </div>
@@ -482,8 +608,17 @@ const Navbar = () => {
                     alignItems: "center",
                   }}
                 >
-                  <Text>{cartItems.length} item</Text>
-                  <Text style={{ cursor: "pointer" }} onClick={handleClearAll}>
+                  <Text style={{ color: "black", fontWeight: "500" }}>
+                    {cartItems.length} {cartItems.length > 1 ? "items" : "item"}
+                  </Text>
+                  <Text
+                    style={{
+                      cursor: "pointer",
+                      color: "black",
+                      fontWeight: "500",
+                    }}
+                    onClick={handleClearAll}
+                  >
                     Clear all
                   </Text>
                 </div>
@@ -491,7 +626,7 @@ const Navbar = () => {
                   <div
                     style={{
                       display: "flex",
-                      marginTop: "40px",
+                      marginTop: "30px",
                       alignItems: "center",
                       border: "1px solid #ddd",
                       borderRadius: 8,
@@ -514,16 +649,51 @@ const Navbar = () => {
                       loading="lazy"
                     />
                     <div>
-                      <Text style={{ fontSize: "22px", color: "black" }}>
+                      <Text
+                        style={{
+                          fontSize: "21px",
+                          color: "black",
+                          fontWeight: "500",
+                        }}
+                      >
                         {item.name}
                       </Text>
-                      <Text>{item.price}</Text>
+                      <Text>{item.price} ETH</Text>
                     </div>
-                    <div style={{ marginLeft: "auto", background: "white" }}>
-                      <MdDelete style={{ fontSize: "30px" }} />
+                    <div
+                      style={{
+                        marginLeft: "auto",
+                        background: "white",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => handleRemoveItemCart(item)}
+                    >
+                      <MdDelete
+                        style={{ fontSize: "30px" }}
+                        className={styles["delete-icon"]}
+                      />
                     </div>
                   </div>
                 ))}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginTop: "30px",
+                  }}
+                >
+                  <Text style={{ fontSize: "20px", fontWeight: "500" }}>
+                    Total price
+                  </Text>
+                  <div style={{ textAlign: "right" }}>
+                    <Text style={{ fontSize: "18px", fontWeight: "500" }}>
+                      {totalPrice} ETH
+                    </Text>
+                    <Text style={{ fontSize: "16px", color: "#323233" }}>
+                    ${usdPrice}
+                    </Text>
+                  </div>
+                </div>
 
                 <div
                   style={{
@@ -534,14 +704,18 @@ const Navbar = () => {
                 >
                   <Button
                     style={{
-                      background: "#009cf7",
+                      background: "#ae4cff",
                       color: "#fff",
                       width: "100%",
                       padding: "12px 40px",
-                      marginTop: "40px",
+                      marginTop: "30px",
+                      borderRadius: "20px",
                     }}
                     onClick={handleBuyCart}
                   >
+                    <MdOutlinePayment
+                      style={{ marginRight: "4px", marginTop: "2px" }}
+                    />
                     Complete purchase
                   </Button>
                 </div>

@@ -15,7 +15,6 @@ import {
   ModalOverlay,
   Text,
   useDisclosure,
-  useToast,
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import styles from "../styles/auction.module.scss";
@@ -31,6 +30,7 @@ import axios from "axios";
 import Countdown from "react-countdown";
 import { FaRegHeart } from "react-icons/fa";
 import { AiOutlineEye } from "react-icons/ai";
+import { toast } from 'react-toastify';
 declare var window: any;
 
 const Auction = () => {
@@ -136,8 +136,6 @@ const Auction = () => {
   const [placeBid, setPlaceBid] = useState(0);
   const [auctionId, setAuctionId] = useState(0);
 
-  const toast = useToast();
-
   const handleJoinAuction = async () => {
     console.log(placeBid);
     console.log(auctionId);
@@ -162,27 +160,30 @@ const Auction = () => {
 
       await joinAuctionTx.wait();
 
-      console.log("Join aution this nft successful!");
       onCloseModalJoin();
-      toast({
-        title: "Successfully",
-        description: "Join this auction successfully !",
-        status: "success",
-        duration: 2000,
-        isClosable: true,
-        position: "top",
-      });
+      toast.success('Join this auction successfully!', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
     } catch (error) {
       console.error(error);
       onCloseModalJoin();
-      toast({
-        title: "Join auction",
-        description: "Join this auction fail !",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-        position: "top",
-      });
+      toast.error('Join this auction fail!', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
     }
   };
 
