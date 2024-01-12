@@ -2,11 +2,6 @@
   {
     "inputs": [
       {
-        "internalType": "contract IERC20",
-        "name": "_token",
-        "type": "address"
-      },
-      {
         "internalType": "contract IERC721",
         "name": "_nft",
         "type": "address"
@@ -133,7 +128,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "_tokenId",
+            "name": "tokenId",
             "type": "uint256"
           },
           {
@@ -209,7 +204,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "_tokenId",
+            "name": "tokenId",
             "type": "uint256"
           },
           {
@@ -272,16 +267,11 @@
         "internalType": "uint256",
         "name": "_auctionId",
         "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_bid",
-        "type": "uint256"
       }
     ],
     "name": "joinAuction",
     "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "payable",
     "type": "function"
   },
   {

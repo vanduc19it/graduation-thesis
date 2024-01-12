@@ -252,7 +252,7 @@ const Profile = () => {
 
         if (tx) {
           setTx(tx?.transactionHash);
-          setOpen(true);
+          onOpen1()
           setLoadingMap((prevLoadingMap) => ({
             ...prevLoadingMap,
             [item.idToken]: false,
@@ -282,10 +282,6 @@ const Profile = () => {
     }
   };
 
-  const [endTime, setEndTime1] = useState(Date.now() + 1200000000);
-  const [endTime1, setEndTime2] = useState(Date.now() + 500000000);
-  const [endTime2, setEndTim3] = useState(Date.now() + 800000000);
-
   const [imageNFTAuction, setImageNFTAuction] = useState("");
   const [timeExpireAuction, setTimeExpireAuction] = useState("");
   const [priceAuction, setPriceAuction] = useState("");
@@ -298,12 +294,78 @@ const Profile = () => {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  const {
+    isOpen: isOpen1,
+    onOpen: onOpen1,
+    onClose: onClose1,
+  } = useDisclosure();
+  const {
+    isOpen: isOpen2,
+    onOpen: onOpen2,
+    onClose: onClose2,
+  } = useDisclosure();
+
   const initialRef = React.useRef(null);
   const finalRef = React.useRef(null);
   const [count, setCount] = useState(1);
 
+  const [loading, setLoading] = useState(false);
+
+
+
   const handleCreateAuction = async () => {
     try {
+     
+      // Check auction price > 0
+      if (Number(priceAuction) <= 0) {
+        toast.warn('Auction price must be greater than 0!', {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          });
+        return;
+      }
+
+      
+
+      // Check expiration time > start time
+      const currentTime = Math.round(new Date().getTime() / 1000);
+      if(timeExpireAuction != "") {
+        const expireTime = Math.round(new Date(timeExpireAuction).getTime() / 1000);
+        if (expireTime <= currentTime) {
+          toast.warn('Expiration time must be greater than the current time!', {
+            position: "top-center",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            });
+          return;
+        }
+      } else {
+        toast.warn("Expiration time not selected yet!", {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          });
+        return;
+      }
+
+      setLoading(true);
+
       const provider: any = new ethers.providers.Web3Provider(window.ethereum);
       const signer: any = provider.getSigner();
       const nft: any = new ethers.Contract(NFTAddress.address, NFTAbi, signer);
@@ -329,10 +391,18 @@ const Profile = () => {
         { gasLimit: 1000000 }
       );
       console.log(createAuction);
-      setCount(count + 1);
-      onClose();
+      if(createAuction?.hash) {
+        setCount(count + 1);
+        setLoading(false);
+        onClose();
+
+        setTx(createAuction?.hash);
+        onOpen2();
+      }
+    
     } catch (error) {
       console.log(error);
+      setLoading(false);
     }
   };
   const [nftAuction, setNftAuction] = useState<any[]>([]);
@@ -358,26 +428,33 @@ const Profile = () => {
         const newItems: any[] = [];
 
         for (let i = 0; i < createAuction.length; i++) {
-          const tokenId = createAuction[i]?._tokenId.toNumber();
-          const auctionId = createAuction[i]?.auctionId.toNumber();
-          const startTime = createAuction[i]?.startTime.toNumber();
-          const endTime = createAuction[i]?.endTime.toNumber();
+          const tokenId = createAuction[i]?.tokenId.toNumber();
+        const auctionId = createAuction[i]?.auctionId.toNumber();
+        const startTime = createAuction[i]?.startTime.toNumber();
+        const endTime = createAuction[i]?.endTime.toNumber();
+        const lastBidder = createAuction[i]?.lastBidder;
+        const auctioner= createAuction[i]?.auctioneer;          ;
 
-          const tokenURI = await nft.tokenURI(tokenId);
-          const response = await axios.get(tokenURI);
+        const tokenURI = await nft.tokenURI(tokenId);
+        const response = await axios.get(tokenURI);
+        const owner = await nft.ownerOf(tokenId);
 
-          const { name, image, description, price } = response.data;
+        const { name, image, description } = response.data;
+        const lastBid = ethers.utils.formatUnits(createAuction[i]?.lastBid, 'ether')
 
-          const newItem = {
-            auctionId: auctionId,
-            idToken: tokenId,
-            name,
-            image,
-            description,
-            price,
-            startTime: startTime,
-            endTime: endTime,
-          };
+        const newItem: any = {
+          auctionId: auctionId,
+          idToken: tokenId,
+          name,
+          image,
+          description,
+          lastBid,
+          lastBidder,
+          auctioner,
+          startTime: startTime,
+          endTime: endTime,
+          owner: owner,
+        };
           newItems.push(newItem);
         }
         setNftAuction([]);
@@ -399,24 +476,57 @@ const Profile = () => {
     router.push(`https://mumbai.polygonscan.com/tx/${tx}`);
   };
 
+  const [cancellingItems, setCancellingItems] = useState<string[]>([]);
   //xử lý hủy đấu giá
   const handleCancelAuction = async (auctionId: any) => {
-    const provider: any = new ethers.providers.Web3Provider(window.ethereum);
-    const signer: any = provider.getSigner();
-    const auctionContract = new ethers.Contract(
-      AuctionAddress.address,
-      AuctionAbi,
-      signer
-    );
-    const cancelAuctionTx = await auctionContract.cancelAuction(
-      ethers.BigNumber.from(auctionId),
-      { gasLimit: 1000000 }
-    );
+    try {
+      setCancellingItems((prevItems) => [...prevItems, auctionId]);
+      const provider: any = new ethers.providers.Web3Provider(window.ethereum);
+      const signer: any = provider.getSigner();
+      const auctionContract = new ethers.Contract(
+        AuctionAddress.address,
+        AuctionAbi,
+        signer
+      );
+      const cancelAuctionTx = await auctionContract.cancelAuction(
+        ethers.BigNumber.from(auctionId),
+        { gasLimit: 1000000 }
+      );
+  
+      await cancelAuctionTx.wait();
 
-    await cancelAuctionTx.wait();
+      toast.success('Cancel aution this nft successful!', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
+        setCancellingItems((prevItems) =>
+        prevItems.filter((item) => item !== auctionId)
+      );
 
-    console.log("Cancel aution this nft successful!");
-    setCount(count + 1);
+      setCount(count + 1);
+
+    } catch (error) {
+      setCancellingItems((prevItems) =>
+      prevItems.filter((item) => item !== auctionId)
+    );
+      toast.error('Cancel aution this nft fail!', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
+    }
+   
   };
 
   function formatJoinedDate(created_at: any) {
@@ -583,9 +693,63 @@ const Profile = () => {
     }
   };
 
+
+   const [finishedAuction, setFinishedAuction] = useState(false);
+
+
+   const handleFinishAuction = async(auctionId: any) => {
+    try {
+      setCancellingItems((prevItems) => [...prevItems, auctionId]);
+      const provider: any = new ethers.providers.Web3Provider(window.ethereum);
+      const signer: any = provider.getSigner();
+      const auctionContract = new ethers.Contract(
+        AuctionAddress.address,
+        AuctionAbi,
+        signer
+      );
+
+
+      // Gọi hàm finishAuction
+      const transaction = await auctionContract.finishAuction(auctionId);
+      
+      // Đợi giao dịch được xác nhận
+      await transaction.wait();
+
+      console.log(transaction);
+      toast.success(' Send Auction NFT to ... successfully', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
+        setCancellingItems((prevItems) =>
+        prevItems.filter((item) => item !== auctionId)
+      );
+    } catch (error) {
+      setCancellingItems((prevItems) =>
+        prevItems.filter((item) => item !== auctionId)
+      );
+      toast.error('Error finishing send auction nft!', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
+    }
+   }
+  
+
   return (
     <>
-      <Modal closeOnOverlayClick={true} isOpen={open} onClose={onClose}>
+      <Modal closeOnOverlayClick={true} isOpen={isOpen1} onClose={onClose1}>
         <ModalOverlay />
         <ModalContent style={{ textAlign: "center" }}>
           <ModalHeader>LIST NFT</ModalHeader>
@@ -603,6 +767,25 @@ const Profile = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
+      <Modal closeOnOverlayClick={true} isOpen={isOpen2} onClose={onClose2}>
+        <ModalOverlay />
+        <ModalContent style={{ textAlign: "center" }}>
+          <ModalHeader>AUCTION NFT</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <Text style={{ fontStyle: "italic" }}>
+              (Auction this nft successfully)
+            </Text>
+            <Button
+              style={{ marginTop: "20px", background: "yellow" }}
+              onClick={handleViewTx}
+            >
+              {tx.slice(0, 10)}...{tx.slice(-10)}
+            </Button>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+      {/* modal auction */}
       <Modal
         initialFocusRef={initialRef}
         finalFocusRef={finalRef}
@@ -627,13 +810,17 @@ const Profile = () => {
                 objectFit="contain"
                 background="#fff"
                 border="1px solid #eee"
+                borderRadius={10}
               />
             </FormControl>
             <FormControl>
               <FormLabel>Price auction</FormLabel>
               <Input
+                type="number"
                 ref={initialRef}
+                borderRadius={10}
                 placeholder="0"
+                min={0}
                 onChange={(e: any) => setPriceAuction(e.target.value)}
               />
             </FormControl>
@@ -641,17 +828,22 @@ const Profile = () => {
             <FormControl mt={4}>
               <FormLabel>Expiration date</FormLabel>
               <Input
-                type="date"
+                type="datetime-local"
                 onChange={(e) => setTimeExpireAuction(e.target.value)}
               />
             </FormControl>
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleCreateAuction}>
-              Create
+            <Button style={{ background:"#ae4cff" ,color:"white"}} mr={3} borderRadius={20} padding="20px 30px" onClick={handleCreateAuction}>
+              {loading ? (
+                 <>
+                 <Text style={{ marginRight: "4px" }}>Creating</Text>
+                 <Spinner size="sm" />
+               </>
+               ) : 'Create'} 
             </Button>
-            <Button onClick={onClose}>Cancel</Button>
+            <Button onClick={onClose} borderRadius={20} padding="20px 30px">Cancel</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -1105,9 +1297,7 @@ const Profile = () => {
                         </Button>
                       </div>
                       <div className={styles.button_buy}>
-                        {/* <Button style={{background: "linear-gradient(to right, #D01498,#647ECB,#647ECB,#D01498)", color:"#fff", width:"150px"}} >
-          <BsCart4 size={18} style={{marginRight:"4px"}} />Purchase
-          </Button> */}
+                       
                       </div>
                     </Card>
                   ))}
@@ -1301,6 +1491,31 @@ const Profile = () => {
                           <FaRegHeart />
                         </Text>
                       </div>
+                      <div> 
+                  {
+                    item.endTime * 1000 <= Date.now() ? (
+                      <Text
+                    style={{
+                      fontWeight: "600",
+                      width:"200px",
+                      color: "white",
+                      fontSize: "14px",
+                      background: "rgba(0,0,0,0.5)",
+                      position: "absolute",
+                      top: "30%",
+                      left: "50%",
+                      padding:"10px 20px",
+                      transform: "translate(-50%, -50%)",
+                      borderRadius: "20px",
+                      textAlign:"center"
+                    }}
+                  >
+                    Auction has ended!
+                  </Text>
+                    ) : (<></>)
+                  }
+                  
+                </div>
                       <hr style={{ borderColor: "#eee" }} />
                       <div className={styles.price}>
                         <Text
@@ -1319,34 +1534,109 @@ const Profile = () => {
                             fontWeight: "600",
                           }}
                         >
-                          {item.price} ETH
+                          {Number(item.lastBid).toFixed(2)} ETH
                         </Text>
                       </div>
                       <div className={styles.button_buy}>
-                        <Button
-                          style={{
-                            border: "1px solid black",
-                            color: "#000",
-                            borderRadius: "20px",
-                          }}
-                          variant="outline"
-                          isDisabled
-                        >
-                          <Countdown
-                            date={item?.endTime * 1000}
-                            // onComplete={() => alert('Time is up!')}
-                          />
-                        </Button>
-                        <Button
-                          style={{
-                            background: "#ea0061",
-                            color: "white",
-                            borderRadius: "20px",
-                          }}
-                          onClick={() => handleCancelAuction(item.auctionId)}
-                        >
-                          Cancel
-                        </Button>
+                        {
+                           item.endTime * 1000 <= Date.now() ? (
+                            <>
+                            <Button
+                            style={{
+                              background:"#fff",
+                              border: "1px solid black",
+                              color: "#000",
+                              borderRadius: "20px",
+                              fontSize:'14px',
+                              cursor:"default"
+                            }}
+                            variant="outline"
+                           
+                          >
+                             {
+                      item?.lastBidder != "0x0000000000000000000000000000000000000000" ? (
+                        <div style={{display:"flex", justifyContent:"center", alignItems:"center", }}>
+
+                      <Image
+                      src="/winner.png"
+                      alt=""
+                      width={6}
+                      style={{ borderRadius: "50%", marginRight: "6px", marginTop:"-4px" }}
+                      loading="lazy"
+                    />
+                          <span style={{fontSize:"12px", color:"black"}}> Winner is  <span style={{color:"red"}}>{item?.lastBidder?.substring(0, 3) +
+                          "..." +
+                          item?.lastBidder?.substring(40)}</span></span>
+                        </div>
+                       
+                      )  : "No one has joined"
+                    }
+                          </Button>
+                          {
+                             item?.lastBidder != "0x0000000000000000000000000000000000000000" ? 
+                             (
+                              <Button
+                              style={{
+                                background: "#4287f5",
+                                color: "white",
+                                borderRadius: "20px",
+                              }}
+                              isLoading={cancellingItems.includes(item.auctionId)} 
+                              onClick={() => handleFinishAuction(item.auctionId)}
+                            >
+   
+                              Send
+                            </Button>
+                             ) : 
+                             (
+                              <Button
+                              style={{
+                                background: "#ea0061",
+                                color: "white",
+                                borderRadius: "20px",
+                              }}
+                              isLoading={cancellingItems.includes(item.auctionId)} 
+                              onClick={() => handleCancelAuction(item.auctionId)}
+                            >
+   
+                              Cancel
+                            </Button>
+                             )
+                          }
+                          
+                         </>
+                           ) : (
+                            <>
+                            <Button
+                            style={{
+                              border: "1px solid black",
+                              color: "#000",
+                              borderRadius: "20px",
+                            }}
+                            variant="outline"
+                            isDisabled
+                          >
+                            <Countdown
+                              date={item?.endTime * 1000}
+                              // onComplete={() => alert('Time is up!')}
+                            />
+                          </Button>
+                           <Button
+                           style={{
+                             background: "#ea0061",
+                             color: "white",
+                             borderRadius: "20px",
+                           }}
+                           isLoading={cancellingItems.includes(item.auctionId)} 
+                           onClick={() => handleCancelAuction(item.auctionId)}
+                         >
+                           Cancel
+                         </Button>
+                         </>
+                           )
+                        }
+                      
+                       
                       </div>
                     </Card>
                   ))}

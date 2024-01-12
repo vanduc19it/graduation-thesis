@@ -13,6 +13,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Spinner,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -73,60 +74,87 @@ const Auction = () => {
 
   //get list những nft đang đấu giá.
   useEffect(() => {
-    const getListAuction = async () => {
-      try {
-        const provider = new ethers.providers.JsonRpcProvider(
-          "https://polygon-mumbai.infura.io/v3/4cd2c1a8018646908347fb2223053b30"
-        );
-        const auctionContract = new ethers.Contract(
-          AuctionAddress.address,
-          AuctionAbi,
-          provider
-        );
-        const nft: any = new ethers.Contract(
-          NFTAddress.address,
-          NFTAbi,
-          provider
-        );
-
-        const createAuction = await auctionContract.getAuctionByStatus(true);
-        const newItems: any[] = [];
-
-        for (let i = 0; i < createAuction.length; i++) {
-          const tokenId = createAuction[i]?._tokenId.toNumber();
-          const auctionId = createAuction[i]?.auctionId.toNumber();
-          const startTime = createAuction[i]?.startTime.toNumber();
-          const endTime = createAuction[i]?.endTime.toNumber();
-
-          const tokenURI = await nft.tokenURI(tokenId);
-          const response = await axios.get(tokenURI);
-          const owner = await nft.ownerOf(tokenId);
-
-          const { name, image, description, price } = response.data;
-
-          const newItem: any = {
-            auctionId: auctionId,
-            idToken: tokenId,
-            name,
-            image,
-            description,
-            price,
-            startTime: startTime,
-            endTime: endTime,
-            ower: owner,
-          };
-          newItems.push(newItem);
-        }
-        setAuction(newItems);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
+    
+  
     getListAuction();
   }, []);
 
+  const handleGetUser = async (addressWallet: any) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/get_user/${addressWallet}`
+      );
+      const data = response.data;
+      return data.user.avatar
+        } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const getListAuction = async () => {
+    try {
+      const provider = new ethers.providers.JsonRpcProvider(
+        "https://polygon-mumbai.infura.io/v3/4cd2c1a8018646908347fb2223053b30"
+      );
+      const auctionContract = new ethers.Contract(
+        AuctionAddress.address,
+        AuctionAbi,
+        provider
+      );
+      const nft: any = new ethers.Contract(
+        NFTAddress.address,
+        NFTAbi,
+        provider
+      );
+
+      const createAuction = await auctionContract.getAuctionByStatus(true);
+
+      console.log(createAuction)
+      const newItems: any[] = [];
+
+      for (let i = 0; i < createAuction.length; i++) {
+        const tokenId = createAuction[i]?.tokenId.toNumber();
+        const auctionId = createAuction[i]?.auctionId.toNumber();
+        const startTime = createAuction[i]?.startTime.toNumber();
+        const endTime = createAuction[i]?.endTime.toNumber();
+        const lastBidder = createAuction[i]?.lastBidder;
+        const auctioner= createAuction[i]?.auctioneer;          ;
+
+        const tokenURI = await nft.tokenURI(tokenId);
+        const response = await axios.get(tokenURI);
+        const owner = await nft.ownerOf(tokenId);
+
+        const { name, image, description } = response.data;
+        const lastBid = ethers.utils.formatUnits(createAuction[i]?.lastBid, 'ether')
+
+        const result = await handleGetUser(auctioner);
+
+        const newItem: any = {
+          auctionId: auctionId,
+          idToken: tokenId,
+          name,
+          image,
+          description,
+          lastBid,
+          lastBidder,
+          auctioner,
+          startTime: startTime,
+          endTime: endTime,
+          owner: owner,
+          owner_avatar: result
+        };
+        newItems.push(newItem);
+      }
+      setAuction(newItems);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   console.log(auction);
+
+
+ 
 
   const {
     isOpen: isOpenModalJoin,
@@ -135,11 +163,29 @@ const Auction = () => {
   } = useDisclosure();
   const [placeBid, setPlaceBid] = useState(0);
   const [auctionId, setAuctionId] = useState(0);
+  const [lastBid, setLastBid] = useState(0);
+
+  const [loading, setLoading] = useState(false);
 
   const handleJoinAuction = async () => {
-    console.log(placeBid);
-    console.log(auctionId);
+
     try {
+       // Check auction bid > last bid
+       if (Number(placeBid) <= lastBid) {
+        toast.warn('Auction price must be greater than last bid!', {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          });
+        return;
+      }
+      setLoading(true);
+
       const provider: any = new ethers.providers.Web3Provider(window.ethereum);
       const signer: any = provider.getSigner();
       const auctionContract = new ethers.Contract(
@@ -147,20 +193,19 @@ const Auction = () => {
         AuctionAbi,
         signer
       );
+      
+          const bidAmount = ethers.utils.parseUnits(placeBid.toFixed(18), 'ether'); 
 
-      const placeBidInWei = ethers.utils.parseUnits(
-        placeBid.toString(),
-        "ether"
-      );
-      const joinAuctionTx = await auctionContract.joinAuction(
-        auctionId,
-        placeBidInWei,
-        { gasLimit: 1000000 }
-      );
+      const joinAuctionTx = await auctionContract.joinAuction(auctionId, {
+        value: bidAmount,
+        gasLimit: 1000000
+      });
 
       await joinAuctionTx.wait();
+      setLoading(false);
 
       onCloseModalJoin();
+      getListAuction()
       toast.success('Join this auction successfully!', {
         position: "top-center",
         autoClose: 2000,
@@ -172,6 +217,7 @@ const Auction = () => {
         theme: "light",
         });
     } catch (error) {
+      setLoading(false);
       console.error(error);
       onCloseModalJoin();
       toast.error('Join this auction fail!', {
@@ -187,10 +233,17 @@ const Auction = () => {
     }
   };
 
+  const [imageNFTAuction, setImageNFTAuction] = useState("");
   const handleJoin = (item: any) => {
     onOpenModalJoin();
+    console.log(item)
     setAuctionId(item.auctionId);
+    setImageNFTAuction(item.image);
+    const lastBid = Number(item?.lastBid);
+    setLastBid(lastBid);
   };
+
+  console.log(auction)
 
   return (
     <>
@@ -200,23 +253,45 @@ const Auction = () => {
           <ModalHeader>Join Auction</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={6}>
+          <FormControl>
+              <Image
+                src={imageNFTAuction.replace(
+                  "ipfs://",
+                  "https://ipfs.io/ipfs/"
+                )}
+                loading="lazy"
+                alt="image auction"
+                width={400}
+                height={400}
+                objectFit="contain"
+                background="#fff"
+                border="1px solid #eee"
+                borderRadius={10}
+              />
+            </FormControl>
             <FormControl>
               <FormLabel>Place Bid</FormLabel>
               <Input
                 placeholder="Your Place Bid"
                 type="number"
-                max="1"
+                min={0}
                 onChange={(e) => setPlaceBid(parseFloat(e.target.value))}
                 value={placeBid}
+                borderRadius={10}
               />
             </FormControl>
           </ModalBody>
 
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={handleJoinAuction}>
-              Join
+            <Button style={{ background:"#ae4cff" ,color:"white"}} mr={3} borderRadius={20} padding="20px 30px" onClick={handleJoinAuction}>
+               {loading ? (
+                 <>
+                 <Text style={{ marginRight: "4px" }}>Joining</Text>
+                 <Spinner size="sm" />
+               </>
+               ) : 'Join'} 
             </Button>
-            <Button onClick={onCloseModalJoin}>Cancel</Button>
+            <Button onClick={onCloseModalJoin} borderRadius={20} padding="20px 30px">Cancel</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
@@ -298,7 +373,7 @@ const Auction = () => {
                 <div className={styles.card_body}>
                   <div className={styles.info}>
                     <Image
-                      src="/u1.jpg"
+                      src={item.owner_avatar != "" ? item.owner_avatar : "/u1.jpg"}
                       alt=""
                       width={8}
                       style={{ borderRadius: "50%", marginRight: "6px" }}
@@ -321,7 +396,7 @@ const Auction = () => {
                           fontWeight: "600",
                         }}
                       >
-                        0xf14...
+                        {item?.auctioner?.substring(0, 5)}...
                       </Text>
                     </div>
                   </div>
@@ -342,12 +417,39 @@ const Auction = () => {
                         fontSize: "13px",
                       }}
                     >
-                      {item.price} ETH
+                      {Number(item.lastBid).toFixed(2)} ETH
                     </Text>
                   </div>
                 </div>
-                <div>
-                  <Text
+                <div> 
+                  {
+                    item.endTime * 1000 <= Date.now() ? (
+                      <Text
+                    style={{
+                      fontWeight: "600",
+                      width:"200px",
+                      color: "white",
+                      fontSize: "14px",
+                      background: "rgba(0,0,0,0.5)",
+                      position: "absolute",
+                      top: "30%",
+                      left: "50%",
+                      padding:"10px 20px",
+                      transform: "translate(-50%, -50%)",
+                      borderRadius: "20px",
+                      textAlign:"center"
+                    }}
+                  >
+                    Auction has ended!
+                  </Text>
+                    ) : (<></>)
+                  }
+                  
+                </div>
+                <div> 
+                  {
+                    item.endTime * 1000 > Date.now() ? (
+                      <Text
                     style={{
                       fontWeight: "600",
                       color: "white",
@@ -369,571 +471,70 @@ const Auction = () => {
                     <Countdown
                       date={item?.endTime * 1000}
 
-                      // onComplete={() => alert('Time is up!')}
+                      // onComplete={()=>handleAuctionFinish(item)}
                     />
                   </Text>
+                    ) : (<></>)
+                  }
+                  
                 </div>
                 {/* <hr style={{ borderColor: "#eee" }} /> */}
                 <div className={styles.price}>
+                {item.endTime * 1000 > Date.now() ? (
+                   <Button
+                   style={{
+                     background: "#ae4cff",
+                     color: "#fff",
+                     padding: "10px 10px",
+                     width: "100%",
+                     fontSize: "14px",
+                     borderRadius: "20px",
+                   }}
+                   onClick={() => handleJoin(item)}
+                 >
+                   🔥 Join Auction
+                 </Button>
+                ) : (
                   <Button
-                    style={{
-                      background: "#ae4cff",
-                      color: "#fff",
-                      padding: "10px 10px",
-                      width: "100%",
-                      fontSize: "14px",
-                      borderRadius: "20px",
-                    }}
-                    onClick={() => handleJoin(item)}
-                  >
-                    🔥 Join Auction
-                  </Button>
+                  disabled={true}
+                  colorScheme="yellow"
+                   style={{
+                      background:"transparent",
+                     color: "black",
+                     padding: "10px 10px",
+                     width: "100%",
+                     fontSize: "14px",
+                     borderRadius: "20px",
+                     cursor:"default",
+                     border:"1px solid black"
+                   }}>
+                    {
+                      item?.lastBidder != "0x0000000000000000000000000000000000000000" ? (
+                        <div style={{display:"flex", justifyContent:"center", alignItems:"center", }}>
+
+                      <Image
+                      src="/winner.png"
+                      alt=""
+                      width={6}
+                      style={{ borderRadius: "50%", marginRight: "6px", marginTop:"-4px" }}
+                      loading="lazy"
+                    />
+                          <span> Winner is  <span style={{color:"red"}}>{item?.lastBidder?.substring(0, 5) +
+                          "..." +
+                          item?.lastBidder?.substring(38)}</span></span>
+                        </div>
+                       
+                      )  : "No one has joined"
+                    }
+                    
+                   </Button>
+                )}
+                 
                 </div>
               </Card>
             </div>
           ))}
-          <div>
-            <Card
-              className={styles.card}
-              style={{
-                boxShadow: "0 0 25px rgba(0, 0, 0, 0.1)",
-                borderRadius: "20px",
-                margin: "10px",
-              }}
-            >
-              <Image
-                src="/image/9.jpg"
-                alt=""
-                style={{
-                  borderRadius: "20px",
-                  maxHeight: 284,
-                  objectFit: "contain",
-                  border: "1px solid #ddd",
-                }}
-                loading="lazy"
-              />
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    fontWeight: "600",
-                    color: "#484848",
-                    fontSize: "18px",
-                    marginTop: "15px",
-                  }}
-                >
-                  Fancy Car
-                </Text>
-                <Text
-                  style={{
-                    fontWeight: "600",
-                    color: "#484848",
-                    marginTop: "10px",
-                  }}
-                >
-                  <FaRegHeart />
-                </Text>
-              </div>
-
-              <div className={styles.card_body}>
-                <div className={styles.info}>
-                  <Image
-                    src="/u1.jpg"
-                    alt=""
-                    width={8}
-                    style={{ borderRadius: "50%", marginRight: "6px" }}
-                    loading="lazy"
-                  />
-                  <div>
-                    <Text
-                      style={{
-                        fontSize: "14px",
-                        color: "#000",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Owner
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: "13px",
-                        color: "#222",
-                        fontWeight: "600",
-                      }}
-                    >
-                      0xf14...
-                    </Text>
-                  </div>
-                </div>
-                <div>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#000",
-                      fontSize: "14px",
-                    }}
-                  >
-                    Highest bid
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#484848",
-                      fontSize: "13px",
-                    }}
-                  >
-                    0.03 ETH
-                  </Text>
-                </div>
-              </div>
-              <div>
-                <Text
-                  style={{
-                    fontWeight: "600",
-                    color: "white",
-                    fontSize: "18px",
-                    background: "rgba(174,76,255,0.8)",
-                    position: "absolute",
-                    lineHeight: "40px",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    borderRadius: "20px",
-                    padding: " 0 30px",
-                    display: "flex",
-                    gap: 4,
-                    alignItems: "center",
-                  }}
-                >
-                  <span>🔥</span>
-                  01:08:45:20
-                </Text>
-              </div>
-              {/* <hr style={{ borderColor: "#eee" }} /> */}
-              <div className={styles.price}>
-                <Button
-                  style={{
-                    background: "#ae4cff",
-                    color: "#fff",
-                    padding: "10px 10px",
-                    width: "100%",
-                    fontSize: "14px",
-                    borderRadius: "20px",
-                  }}
-                >
-                  🔥 Join Auction
-                </Button>
-              </div>
-            </Card>
-          </div>
-          <div>
-            <Card
-              className={styles.card}
-              style={{
-                boxShadow: "0 0 25px rgba(0, 0, 0, 0.1)",
-                borderRadius: "20px",
-                margin: "10px",
-              }}
-            >
-              <Image
-                src="/image/10.jpg"
-                alt=""
-                style={{
-                  borderRadius: "20px",
-                  maxHeight: 284,
-                  objectFit: "contain",
-                  border: "1px solid #ddd",
-                }}
-                loading="lazy"
-              />
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    fontWeight: "600",
-                    color: "#484848",
-                    fontSize: "18px",
-                    marginTop: "15px",
-                  }}
-                >
-                  Animal Playing
-                </Text>
-                <Text
-                  style={{
-                    fontWeight: "600",
-                    color: "#484848",
-                    marginTop: "10px",
-                  }}
-                >
-                  <FaRegHeart />
-                </Text>
-              </div>
-
-              <div className={styles.card_body}>
-                <div className={styles.info}>
-                  <Image
-                    src="/u1.jpg"
-                    alt=""
-                    width={8}
-                    style={{ borderRadius: "50%", marginRight: "6px" }}
-                    loading="lazy"
-                  />
-                  <div>
-                    <Text
-                      style={{
-                        fontSize: "14px",
-                        color: "#000",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Owner
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: "13px",
-                        color: "#222",
-                        fontWeight: "600",
-                      }}
-                    >
-                      0xf14...
-                    </Text>
-                  </div>
-                </div>
-                <div>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#000",
-                      fontSize: "14px",
-                    }}
-                  >
-                    Highest bid
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#484848",
-                      fontSize: "13px",
-                    }}
-                  >
-                    0.02 ETH
-                  </Text>
-                </div>
-              </div>
-              <div>
-                <Text
-                  style={{
-                    fontWeight: "600",
-                    color: "white",
-                    fontSize: "18px",
-                    background: "rgba(174,76,255,0.8)",
-                    position: "absolute",
-                    lineHeight: "40px",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%)",
-                    borderRadius: "20px",
-                    padding: " 0 30px",
-                    display: "flex",
-                    gap: 4,
-                    alignItems: "center",
-                  }}
-                >
-                  <span>🔥</span>
-                  06:03:20:10
-                </Text>
-              </div>
-              {/* <hr style={{ borderColor: "#eee" }} /> */}
-              <div className={styles.price}>
-                <Button
-                  style={{
-                    background: "#ae4cff",
-                    color: "#fff",
-                    padding: "10px 10px",
-                    width: "100%",
-                    fontSize: "14px",
-                    borderRadius: "20px",
-                  }}
-                >
-                  🔥 Join Auction
-                </Button>
-              </div>
-            </Card>
-          </div>
-
-          <div>
-            <Card
-              className={styles.card}
-              style={{
-                boxShadow: "0 0 25px rgba(0, 0, 0, 0.1)",
-                borderRadius: "20px",
-                margin: "10px",
-              }}
-            >
-              <Image
-                src="/image/3.jpg"
-                alt=""
-                style={{ borderRadius: "20px" }}
-                loading="lazy"
-              />
-              <Text
-                style={{
-                  fontWeight: "600",
-                  color: "#484848",
-                  fontSize: "18px",
-                  marginTop: "15px",
-                }}
-              >
-                Micraft1
-              </Text>
-              <div className={styles.card_body}>
-                <div>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#000",
-                      fontSize: "14px",
-                    }}
-                  >
-                    Highest bid
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#484848",
-                      fontSize: "13px",
-                    }}
-                  >
-                    0.01 ETH
-                  </Text>
-                </div>
-                <div>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#000",
-                      fontSize: "14px",
-                    }}
-                  >
-                    Ends in
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#484848",
-                      fontSize: "13px",
-                    }}
-                  >
-                    05:18:20:38
-                  </Text>
-                </div>
-              </div>
-              <hr style={{ borderColor: "#eee" }} />
-              <div className={styles.price}>
-                <div className={styles.info}>
-                  <Image
-                    src="/image/avata2.avif"
-                    alt=""
-                    width={8}
-                    style={{ borderRadius: "50%", marginRight: "6px" }}
-                    loading="lazy"
-                  />
-                  <div>
-                    <Text
-                      style={{
-                        fontSize: "14px",
-                        color: "#000",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Creator
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: "13px",
-                        color: "#222",
-                        fontWeight: "600",
-                      }}
-                    >
-                      0xf14...
-                    </Text>
-                  </div>
-                </div>
-
-                <div className={styles.info}>
-                  <Image
-                    src="/image/avata2.avif"
-                    alt=""
-                    width={8}
-                    style={{ borderRadius: "50%", marginRight: "6px" }}
-                    loading="lazy"
-                  />
-                  <div>
-                    <Text
-                      style={{
-                        fontSize: "14px",
-                        color: "#000",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Owner
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: "13px",
-                        color: "#222",
-                        fontWeight: "600",
-                      }}
-                    >
-                      0xf14...
-                    </Text>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </div>
-          <div>
-            <Card
-              className={styles.card}
-              style={{
-                boxShadow: "0 0 25px rgba(0, 0, 0, 0.1)",
-                borderRadius: "20px",
-                margin: "10px",
-              }}
-            >
-              <Image
-                src="/image/phanta1.png"
-                alt=""
-                style={{ borderRadius: "20px" }}
-                loading="lazy"
-              />
-              <Text
-                style={{
-                  fontWeight: "600",
-                  color: "#484848",
-                  fontSize: "18px",
-                  marginTop: "15px",
-                }}
-              >
-                {" "}
-                Phanta Bear
-              </Text>
-              <div className={styles.card_body}>
-                <div>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#000",
-                      fontSize: "14px",
-                    }}
-                  >
-                    Highest bid
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#484848",
-                      fontSize: "13px",
-                    }}
-                  >
-                    0.04 ETH
-                  </Text>
-                </div>
-                <div>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#000",
-                      fontSize: "14px",
-                    }}
-                  >
-                    Ends in
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#484848",
-                      fontSize: "13px",
-                    }}
-                  >
-                    03:10:26:17
-                  </Text>
-                </div>
-              </div>
-              <hr style={{ borderColor: "#eee" }} />
-              <div className={styles.price}>
-                <div className={styles.info}>
-                  <Image
-                    src="/image/avata2.avif"
-                    alt=""
-                    width={8}
-                    style={{ borderRadius: "50%", marginRight: "6px" }}
-                    loading="lazy"
-                  />
-                  <div>
-                    <Text
-                      style={{
-                        fontSize: "14px",
-                        color: "#000",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Creator
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: "13px",
-                        color: "#222",
-                        fontWeight: "600",
-                      }}
-                    >
-                      0xf14...
-                    </Text>
-                  </div>
-                </div>
-
-                <div className={styles.info}>
-                  <Image
-                    src="/image/avata2.avif"
-                    alt=""
-                    width={8}
-                    style={{ borderRadius: "50%", marginRight: "6px" }}
-                    loading="lazy"
-                  />
-                  <div>
-                    <Text
-                      style={{
-                        fontSize: "14px",
-                        color: "#000",
-                        fontWeight: "600",
-                      }}
-                    >
-                      Owner
-                    </Text>
-                    <Text
-                      style={{
-                        fontSize: "13px",
-                        color: "#222",
-                        fontWeight: "600",
-                      }}
-                    >
-                      0xf14...
-                    </Text>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </div>
+         
         </Slider>
       </div>
     </>

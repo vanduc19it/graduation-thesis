@@ -8,6 +8,8 @@ export const SearchContext = createContext<SearchContextProps>({
   isLoggedIn: false,
   cartCheck: false,
   addToCart:() => {},
+  user: null,
+  setUser: () => {},
 });
 
 interface SearchContextProps {
@@ -17,6 +19,8 @@ interface SearchContextProps {
   handleSearch: (query: string) => void;
   handleConnect1: (query1: boolean) => void;
   addToCart: (query2: boolean) => void;
+  user: any,
+  setUser: React.Dispatch<React.SetStateAction<any>>;
 }
 
 interface SearchProviderProps {
@@ -27,6 +31,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cartCheck, setCartCheck] = useState(false);
+  const [user, setUser] = useState(null);
 
   const addToCart = (cart: boolean) => {
     setCartCheck(cart);
@@ -42,7 +47,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
 
   return (
     <SearchContext.Provider
-      value={{ isLoggedIn, handleConnect1, searchQuery, handleSearch,cartCheck, addToCart }}
+      value={{ isLoggedIn, handleConnect1, searchQuery, handleSearch,cartCheck, addToCart, user, setUser }}
     >
       {children}
     </SearchContext.Provider>

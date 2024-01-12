@@ -52,7 +52,7 @@ const Navbar = () => {
   const [address, setAddress] = useState("");
   const [balance, setBalance] = useState(0);
 
-  const { isLoggedIn, handleConnect1 } = useContext(SearchContext);
+  const { isLoggedIn, handleConnect1, user, setUser } = useContext(SearchContext);
   const [login, setLogin] = useState(1);
   const router = useRouter();
 
@@ -91,6 +91,8 @@ const Navbar = () => {
             progress: undefined,
             theme: "light",
             });
+
+          handleGetUser(address);
         }
 
         if (checkNavigateProfile) {
@@ -112,6 +114,7 @@ const Navbar = () => {
     setLogout(logout + 1); //check logout
     handleConnect1(false);
 
+
     toast.success('You has been logged out successfully!', {
       position: "top-center",
       autoClose: 2000,
@@ -130,7 +133,7 @@ const Navbar = () => {
     const balanceData1: any = balanceData ? Number(balanceData) : 0;
     setAddress(addressData); //set address to state wallet
     setBalance(balanceData1);
-  }, [logout, login]);
+  }, [isLoggedIn, logout, login]);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const {
@@ -190,8 +193,20 @@ const Navbar = () => {
 
   const [cartItems, setCartItems] = useState<any>([]);
   useEffect(() => {
-    console.log(isLoggedIn)
-    if (isOpenModal2 || cartCheck || isLoggedIn || !isLoggedIn) {
+      if (isLoggedIn) {
+
+          handleGetCart();
+        
+      } else {
+
+        const storedCartItems = JSON.parse(
+          localStorage.getItem("cartItems") || "[]"
+        );
+        setCartItems(storedCartItems);
+      }
+    
+
+    if (isOpenModal2 || cartCheck) {
       if (address?.length > 0) {
         handleGetCart();
       } else {
@@ -224,9 +239,10 @@ useEffect(() => {
 }, [cartItems]);
 
   const handleGetCart = async () => {
+    const addressData1: any = localStorage.getItem("address");
     try {
       const response = await axios.get(
-        `http://localhost:5000/get_cart/${address}`
+        `http://localhost:5000/get_cart/${addressData1}`
       );
 
       if (response.status === 200) {
@@ -324,6 +340,25 @@ useEffect(() => {
       });
   };
 
+  
+  const handleGetUser = async (addressWallet: any) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/get_user/${addressWallet}`
+      );
+      const data = response.data;
+      console.log(data.user);
+      setUser(data.user);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  useEffect(() => {
+    const addressData: any = localStorage.getItem("address");
+    handleGetUser(addressData)
+    console.log("Dữ liệu người dùng:", user);
+  }, []);
   return (
     <>
       <Modal isOpen={isOpen} onClose={onClose}>
@@ -506,7 +541,7 @@ useEffect(() => {
               >
                 {address?.length > 0 ? (
                   <Image
-                    src="/1.jfif"
+                    src={user?.avatar ? user?.avatar : "/image/avatar-default-icon.png"}
                     alt=""
                     style={{
                       width: "22px",
