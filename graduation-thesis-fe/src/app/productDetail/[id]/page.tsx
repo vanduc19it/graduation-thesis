@@ -20,7 +20,7 @@ import {
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FaRegHeart } from "react-icons/fa";
 import styles from "../../../styles/productdetail.module.scss";
 import { BsCart4 } from "react-icons/bs";
@@ -33,7 +33,10 @@ import Link from "next/link";
 import convertEthToUsd from "../../../utils/covertCurrency"
 import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
+import { SearchContext } from "@/components/SearchContext";
 declare var window: any;
+import { toast } from 'react-toastify';
+import axios from "axios";
 const ProductDetail = () => {
   interface NftData {
     name: string;
@@ -49,6 +52,8 @@ const ProductDetail = () => {
 
   const { id } = param;
   console.log(id);
+
+  const {  addToCart } = useContext(SearchContext);
 
   const [nft, setNft] = useState<NftData>({
     name: "",
@@ -74,8 +79,12 @@ const ProductDetail = () => {
       setNft(nft);
       
       const handleUsd = async() => {
+
+        
        const resultUsd:any = await convertEthToUsd(Number(nft.price));
-      setUsdPrice(resultUsd?.toFixed(2));
+       console.log(resultUsd)
+       const usd:any = Number(resultUsd).toFixed(2)
+      setUsdPrice(usd);
       }
       handleUsd()
       
@@ -121,6 +130,83 @@ const ProductDetail = () => {
       onClose();
     }, 4000);
   };
+
+  const handleAddToCart = (cartItem: any) => {
+
+    addToCart(true);
+
+    const addressData: any = localStorage.getItem("address");
+
+    if(addressData?.length > 0) {
+        saveCartToDatabase(addressData, cartItem);
+    } else {
+      const existingCart = JSON.parse(localStorage.getItem("cartItems") || "[]");
+      const isItemInCart = existingCart.some(
+        (item: any) => item.itemId === cartItem.itemId
+      );
+      if (!isItemInCart) {
+        existingCart.push(cartItem);
+        localStorage.setItem("cartItems", JSON.stringify(existingCart));
+        toast.success('Add item to cart successfully !', {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          });
+      } else {
+        toast.info('You already added this item to cart!', {
+          position: "top-center",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          });
+        
+      }    
+    } 
+};
+
+const saveCartToDatabase = async (walletAddress:any, item:any) => {
+  try {
+    const response = await axios.post(`http://localhost:5000/add_to_cart/${walletAddress}`, item);
+
+    if (response.status === 200) {
+    
+      toast.success('Add item to cart successfully !', {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
+    } else {
+      console.error('Failed to add item to cart:', response.data.error);
+    }
+  } catch (error:any) {
+   
+    toast.info('You already added this item to cart!', {
+      position: "top-center",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      });
+  }
+};
+
   return (
     <>
       <Modal closeOnOverlayClick={true} isOpen={isOpen} onClose={onClose}>
@@ -265,6 +351,7 @@ const ProductDetail = () => {
                 color: "white",
                 marginLeft: "20px",
               }}
+              onClick={()=>handleAddToCart(nft)}
             >
               <BsCart4 style={{ marginRight: "4px" }} />
               Add to Cart
@@ -276,9 +363,9 @@ const ProductDetail = () => {
                 style={{
                   fontWeight: "500",
                   fontSize: "16px",
-                  background: "black",
+                  background: "#fff",
                   borderRadius: "30px",
-                  color: "white",
+                  color: "black",
                   marginRight: "10px",
                   boxShadow: "0 4px 8px 2px rgba(0, 0, 0, 0.1)",
                 }}
@@ -334,10 +421,10 @@ const ProductDetail = () => {
                 </p>
               </TabPanel>
               <TabPanel>
-                <p>Review</p>
+                <p>Review about NFT</p>
               </TabPanel>
               <TabPanel>
-                <p>Detail</p>
+                <p>Detail about NFT</p>
               </TabPanel>
             </TabPanels>
           </Tabs>

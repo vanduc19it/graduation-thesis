@@ -1,179 +1,175 @@
 {
-        "intents": [
-           {
-                "tag": "nft_definition",
-                "patterns": ["What is an NFT?, what nft, introdution about nft, non fungible token, nft, what is nft?"],
-                "responses": ["An NFT (non-fungible token) is a unique digital item stored on a blockchain. NFTs can represent almost anything and serve as a digital record of ownership."],
-                "context": [""]
-           },
-           {
-                "tag": "buy_nft",
-                "patterns": ["How to buy an NFT?, buy nft, purchase nft, how to buy nft, I want to buy nft, buy"],
-                "responses": ["In order to buy an NFT, you'll need a crypto wallet and cryptocurrency (or, in some cases, just a credit or debit card). Using Marketplace, you can buy items listed for sale instantly, bid in auctions, or make offers on any NFTs."],
-                "context": [""]
-           },    
-           {
-                "tag": "auction_nft",
-                "patterns": ["How to auction an NFT auction?, auction nft, i want to auction nft, nft auction, auction"],
-                "responses": ["To bid in an NFT auction on this marketplace, you can navigate to the auction page, enter the amount you wish to bid, and confirm your bid. Keep in mind that auctions have a specific duration, and the highest bidder at the end of the auction wins the NFT."],
-                "context": [""]
-           },
-           {
-                "tag": "connect_wallet",
-                "patterns": ["How to connect my crypto wallet?", "Connect wallet on the platform", "Wallet connection", "Link crypto wallet", "Connecting my wallet to the platform"],
-                "responses": ["To connect your crypto wallet, go to the 'Settings' or 'Profile' section on the platform. Look for the 'Connect Wallet' option and follow the on-screen instructions to link your wallet securely."],
-                "context": [""]
-           },
-           {
-                "tag": "multiple_wallets",
-                "patterns": ["Can I connect multiple wallets?", "Using multiple wallets", "Connect more than one wallet", "Wallet switching", "Managing multiple wallets"],
-                "responses": ["Yes, you can connect and manage multiple wallets on our platform. Navigate to your account settings or profile to add, switch, or disconnect wallets. This allows you flexibility in managing various crypto assets and collections."],
-                "context": [""]
-           },
-           {
-                "tag": "connect_wallet_issues",
-                "patterns": ["I'm having issues connecting my wallet", "Trouble connecting crypto wallet", "Wallet connection problems", "Cannot link my wallet", "Help with wallet connection"],
-                "responses": ["If you're facing issues connecting your wallet, ensure you're using a supported wallet. Double-check your internet connection and browser compatibility. If problems persist, visit our 'Help' section for detailed troubleshooting steps or contact our support team."],
-                "context": [""]
-           },
-           {
-                "tag": "nft_collections",
-                "patterns": ["How to explore NFT collections", "Discover NFT collections", "Show me NFT collections", "Browse NFTs by collection", "Collections on the platform"],
-                "responses": ["Exploring NFT collections is easy! You can navigate to the 'Collections' section, where you'll find a curated list of diverse NFT collections. Feel free to explore and find your favorites!"],
-                "context": [""]
-           },
-           {
-                "tag": "check_ownership",
-                "patterns": ["How to check the ownership history of an NFT?, check ownership, check ownership nft, ownership, ownership history"],
-                "responses": ["To check the ownership history of an NFT on marketplace, you can view the 'Owners' section on the NFT's details page. It displays a list of past owners and the dates of ownership changes."],
-                "context": [""]
-           },
-           {
-                "tag": "minting_nft",
-                "patterns": ["What is minting?, mint nft, what is mint nft, nft minting, minting"],
-                "responses": ["'Minting' an NFT is the process of writing a digital item to the blockchain. This establishes its immutable record of authenticity and ownership."],
-                "context": [""]
-           },
-           {
-                "tag": "create_nft",
-                "patterns": ["How to create an NFT, create nft, create, nft create"],
-                "responses": ["Creating an NFT on marketplace is intuitive and easy. You just need to decide what the purpose and genre of your collection is, set up a crypto wallet, choose a blockchain, create a collection, and mint or drop your NFT(s)."],
-                "context": [""]
-           },
-           {
-                "tag": "sell_nft",
-                "patterns": ["How to sell an NFT", "Selling NFT on marketplace, sell nft, nft sell"],
-                "responses": ["Selling an NFT using Marketplace is simple and user-friendly. Anyone who owns an NFT can list it for sale, whether that's the creator of the NFT or the person who most recently collected it. Creators and collectors have two main ways to sell using Marketplace: via fixed price sale and in an auction. Buyers pay gas fees when purchasing a fixed-price item, sellers pay gas fees when accepting offers in an auction"],
-                "context": [""]
-           },
-           {
-                "tag": "crypto_wallet",
-                "patterns": ["What is a crypto wallet?, cryotp wallet, wallet crypto"],
-                "responses": ["A crypto wallet helps you buy, sell, and store your cryptocurrency and (in many cases) your NFTs."],
-                "context": [""]
-           },
-           {
-                "tag": "web3",
-                "patterns": ["What is web3?, web3, web 3.0"],
-                "responses": ["Web3 is the name given to the concept of a decentralized internet built on blockchain technology. If web 1.0 was the creation of the internet and web 2.0 saw us move to a social platform-centric internet, web3 signifies a shift into a decentralized, public internet centered on the concept of ownership."],
-                "context": [""]
-           },
-           {
-                "tag": "blockchain",
-                "patterns": ["What is blockchain?, what blockchain, blockchain, introdution about blockchain"],
-                "responses": ["A blockchain is a digitally distributed ledger that records transactions and information across a decentralized network. There are different types of blockchains. OpenSea is compatible with the Ethereum, Polygon, Klaytn, Arbitrum, Optimism, Avalanche, and BNB Chain blockchains."],
-                "context": [""]
-           },
-           {
-                "tag": "gas_fees",
-                "patterns": ["What are blockchain gas fees?, gas fee, fee gas"],
-                "responses": ["In web3, the term 'gas fee' refers to the payment needed to execute transactions on the blockchain. These payments compensate the node operators who keep the blockchain functioning. This validation helps ensure the blockchain has a permanent, immutable record."],
-                "context": [""]
-           },
-           {
-                "tag": "cryptocurrency",
-                "patterns": ["What is cryptocurrency?, cryptocurrency"],
-                "responses": ["Cryptocurrency is digital currency that exists on a decentralized system called the blockchain. Cryptocurrency serves as an umbrella term for all digital currencies. These can be accessed through the use of a crypto wallet."],
-                "context": [""]
-           },
-           {
-                "tag": "nft_drops",
-                "patterns": ["What are NFT drops?, nft drops, drops nft"],
-                "responses": ["An NFT drop happens when a new NFT collection is released. NFT drops can vary in both how the NFTs are sold (listed for sale or auction), and in who they're released to (the public, or a specific list called an 'allowlist')."],
-                "context": [""]
-           },
-           {
-                "tag": "upcoming_nft",
-                "patterns": ["Tell me about upcoming NFT releases", "Upcoming NFTs", "What NFTs are releasing soon?", "Any upcoming NFT drops?", "New NFT releases"],
-                "responses": ["Sure! You can stay updated on upcoming NFT releases by checking the 'Upcoming Drops' section on our platform. It provides information about new collections and their release schedules."],
-                "context": [""]
-           },
-           {
-                "tag": "platform_features",
-                "patterns": ["Tell me about platform features", "Platform functionalities", "Features of the platform", "What can I do on this platform?", "Explore platform capabilities"],
-                "responses": ["Our platform offers various features! You can buy, sell, and discover NFTs, participate in auctions, check out upcoming drops, explore diverse collections, and much more. Feel free to ask if you have specific questions about any feature!"],
-                "context": [""]
-           },
-           {
-                "tag": "explore_nft_categories",
-                "patterns": ["Can I explore NFTs based on categories?", "NFT categories", "Sorting NFTs by genre", "Find NFTs by theme", "Exploring specific NFT genres"],
-                "responses": ["Absolutely! Our platform offers a variety of NFT categories. Navigate to the 'Categories' or 'Genres' section to explore NFTs based on themes such as art, music, gaming, and more. Find the perfect collection that aligns with your interests!"],
-                "context": [""]
-           },
-           {
-                "tag": "community_forum",
-                "patterns": ["Is there a community forum?", "Platform user forum", "Community discussions", "Joining the forum", "Engage with the community"],
-                "responses": ["Absolutely! Join our vibrant community forum to connect with other NFT enthusiasts, creators, and collectors. Share your experiences, ask questions, and stay updated on the latest trends and discussions within our community."],
-                "context": [""]
-           },
-           {
-                "tag": "security_measures",
-                "patterns": ["How secure is my account?", "Account safety", "Platform security measures", "Protect my account", "Ensuring account security"],
-                "responses": ["Ensuring the security of your account is a priority. We implement robust security measures, including encryption and two-factor authentication (2FA). Make sure to enable 2FA in your account settings for an extra layer of protection."],
-                "context": [""]
-           },
-           {
-                "tag": "nft_resale",
-                "patterns": ["Can I resell NFTs?", "NFT resale on the platform", "Reselling purchased NFTs", "Resale options", "Selling NFTs I own"],
-                "responses": ["Certainly! You can resell NFTs you own. Navigate to the 'My Collection' or 'Inventory' section, select the NFT you want to sell, and follow the prompts to list it for sale. You can choose between fixed price and auction options."],
-                "context": [""]
-           },
-           {
-                "tag": "withdraw_earnings",
-                "patterns": ["How to withdraw earnings from NFT sales?", "Withdraw funds from sales", "Cash out NFT earnings", "Accessing sales revenue", "Withdrawal process for NFT sales"],
-                "responses": ["To withdraw earnings from NFT sales, go to the 'Earnings' or 'Wallet' section. You can initiate the withdrawal process from there, choosing your preferred withdrawal method. Make sure to follow the provided instructions for a seamless experience."],
-                "context": [""]
-           },
-           {
-                "tag": "greeting",
-                "patterns": ["Hi there", "How are you", "Is anyone there?", "Hey", "Hola", "Hello", "Good day"],
-                "responses": ["Hello, thanks for asking", "Good to see you again", "Hi there, how can I help?"],
-                "context": [""]
-           },
-           {
-                "tag": "goodbye",
-                "patterns": ["Bye", "See you later", "Goodbye", "Nice chatting to you, bye", "Till next time"],
-                "responses": ["See you!", "Have a nice day", "Bye! Come back again soon."],
-                "context": [""]
-           },
-           {
-                "tag": "thanks",
-                "patterns": ["Thanks", "Thank you", "That's helpful", "Awesome, thanks", "Thanks for helping me"],
-                "responses": ["Happy to help!", "Any time!", "My pleasure"],
-                "context": [""]
-           },
-           {
-                "tag": "noanswer",
-                "patterns": [],
-                "responses": ["Sorry, can't understand you", "Please give me more info", "Not sure I understand"],
-                "context": [""]
-           },
-           {
-                "tag": "support",
-                "patterns": ["How to contact customer support?", "Need assistance", "Customer service", "Help with an issue", "Contact support team"],
-                "responses": ["If you require assistance, feel free to contact our customer support team. You can reach out via the 'Support' or 'Contact Us' page on our website, and we'll be happy to help you!"],
-                "context": [""]
-            }
-        ]
-     }
-     
+     "intents": [
+       {
+         "tag": "nft_definition",
+         "patterns": ["What is an NFT?", "Introduce NFTs"],
+         "responses": ["An NFT (non-fungible token) is a unique digital item stored on a blockchain, serving as a digital record of ownership."],
+         "context": [""]
+       },
+       {
+         "tag": "buy_nft",
+         "patterns": ["How to buy an NFT?", "Purchase NFT", "Buy NFT with crypto"],
+         "responses": ["To buy an NFT, you'll need a crypto wallet and cryptocurrency. Use the Marketplace to buy instantly or bid in auctions."],
+         "context": [""]
+       },
+       {
+         "tag": "auction_nft",
+         "patterns": ["How to auction an NFT?", "Participate in NFT auction", "Guide to NFT auctions"],
+         "responses": ["Bid in an NFT auction by going to the auction page, entering your bid, and confirming. The highest bidder at the end wins the NFT."],
+         "context": [""]
+       },
+       {
+         "tag": "connect_wallet",
+         "patterns": ["How to connect my crypto wallet?", "Connect wallet on the platform"],
+         "responses": ["Connect your crypto wallet in 'Settings' or 'Profile,' find 'Connect Wallet,' and follow on-screen instructions."],
+         "context": [""]
+       },
+       {
+         "tag": "multiple_wallets",
+         "patterns": ["Can I connect multiple wallets?", "Use multiple wallets", "Connect more than one wallet"],
+         "responses": ["Yes, manage multiple wallets in your account settings for flexibility with crypto assets."],
+         "context": [""]
+       },
+       {
+         "tag": "connect_wallet_issues",
+         "patterns": ["Issues connecting my wallet", "Trouble with wallet connection", "Help with wallet connection"],
+         "responses": ["If facing issues, ensure a supported wallet, check internet connection, and browser compatibility. Visit 'Help' or contact support for troubleshooting."],
+         "context": [""]
+       },
+       {
+         "tag": "nft_collections",
+         "patterns": ["How to explore NFT collections", "Discover NFT collections", "Browse NFTs by collection"],
+         "responses": ["Explore NFT collections in the 'Collections' section for a curated list of diverse collections."],
+         "context": [""]
+       },
+       {
+         "tag": "check_ownership",
+         "patterns": ["How to check the ownership history of an NFT?", "Check ownership history"],
+         "responses": ["To check ownership history, view the 'Owners' section on the NFT's details page."],
+         "context": [""]
+       },
+       {
+         "tag": "minting_nft",
+         "patterns": ["What is minting?", "Mint NFT"],
+         "responses": ["'Minting' an NFT is the process of writing a digital item to the blockchain, establishing its immutable record of authenticity and ownership."],
+         "context": [""]
+       },
+       {
+         "tag": "create_nft",
+         "patterns": ["How to create an NFT", "Create NFT"],
+         "responses": ["Creating an NFT on the marketplace is intuitive. Decide the purpose, set up a crypto wallet, choose a blockchain, create a collection, and mint or drop your NFT(s)."],
+         "context": [""]
+       },
+       {
+         "tag": "sell_nft",
+         "patterns": ["How to sell an NFT", "Selling NFT on marketplace"],
+         "responses": ["Selling an NFT using Marketplace is simple. List it for sale via fixed price or auction. Buyers pay gas fees for fixed-price items; sellers pay for accepted auction offers."],
+         "context": [""]
+       },
+       {
+         "tag": "crypto_wallet",
+         "patterns": ["What is a crypto wallet?"],
+         "responses": ["A crypto wallet helps you buy, sell, and store cryptocurrency and, in many cases, your NFTs."],
+         "context": [""]
+       },
+       {
+         "tag": "web3",
+         "patterns": ["What is web3?"],
+         "responses": ["Web3 is the concept of a decentralized internet built on blockchain technology, centered on ownership."],
+         "context": [""]
+       },
+       {
+         "tag": "blockchain",
+         "patterns": ["What is blockchain?"],
+         "responses": ["Blockchain is a digitally distributed ledger recording transactions across a decentralized network. Compatible with Ethereum, Polygon, Klaytn, Arbitrum, Optimism, Avalanche, and BNB Chain blockchains."],
+         "context": [""]
+       },
+       {
+         "tag": "gas_fees",
+         "patterns": ["What are blockchain gas fees?"],
+         "responses": ["In web3, 'gas fee' is the payment needed for blockchain transactions, compensating node operators for a permanent, immutable record."],
+         "context": [""]
+       },
+       {
+         "tag": "cryptocurrency",
+         "patterns": ["What is cryptocurrency?"],
+         "responses": ["Cryptocurrency is digital currency existing on a decentralized system called the blockchain, accessible through a crypto wallet."],
+         "context": [""]
+       },
+       {
+         "tag": "nft_drops",
+         "patterns": ["What are NFT drops?"],
+         "responses": ["An NFT drop occurs when a new collection is released, varying in how NFTs are sold and to whom."],
+         "context": [""]
+       },
+       {
+         "tag": "upcoming_nft",
+         "patterns": ["Tell me about upcoming NFT releases", "Upcoming NFTs"],
+         "responses": ["Stay updated on upcoming NFT releases in the 'Upcoming Drops' section, providing information about new collections and release schedules."],
+         "context": [""]
+       },
+       {
+         "tag": "platform_features",
+         "patterns": ["Tell me about platform features", "Platform functionalities"],
+         "responses": ["Our platform offers various features! Buy, sell, and discover NFTs, participate in auctions, check out upcoming drops, explore diverse collections, and more."],
+         "context": [""]
+       },
+       {
+         "tag": "explore_nft_categories",
+         "patterns": ["Can I explore NFTs based on categories?", "NFT categories"],
+         "responses": ["Explore NFT categories in the 'Categories' or 'Genres' section based on themes such as art, music, gaming, and more."],
+         "context": [""]
+       },
+       {
+         "tag": "community_forum",
+         "patterns": ["Is there a community forum?", "Platform user forum"],
+         "responses": ["Join our community forum to connect with NFT enthusiasts, creators, and collectors. Engage in discussions and stay updated on trends."],
+         "context": [""]
+       },
+       {
+         "tag": "security_measures",
+         "patterns": ["How secure is my account?", "Account safety"],
+         "responses": ["Ensuring account security is a priority. Implementing robust measures, including encryption and two-factor authentication (2FA), enhances protection."],
+         "context": [""]
+       },
+       {
+         "tag": "nft_resale",
+         "patterns": ["Can I resell NFTs?", "NFT resale on the platform"],
+         "responses": ["Certainly! Resell NFTs by navigating to 'My Collection' or 'Inventory,' selecting the NFT, and following prompts to list it for sale."],
+         "context": [""]
+       },
+       {
+         "tag": "withdraw_earnings",
+         "patterns": ["How to withdraw earnings from NFT sales?", "Withdraw funds from sales"],
+         "responses": ["Withdraw NFT sales earnings by visiting 'Earnings' or 'Wallet,' initiating the withdrawal process, and choosing your preferred method."],
+         "context": [""]
+       },
+       {
+         "tag": "greeting",
+         "patterns": ["Hi", "Hello", "Good day"],
+         "responses": ["Hello! How can I help you today?", "Hi there! What can I assist you with?", "Good day! How may I assist you?"]
+       },
+       {
+         "tag": "goodbye",
+         "patterns": ["Bye", "See you later", "Goodbye"],
+         "responses": ["Goodbye! If you have more questions, feel free to return.", "See you later! If you need assistance, don't hesitate to reach out."]
+       },
+       {
+         "tag": "thanks",
+         "patterns": ["Thanks", "Thank you", "That's helpful", "Awesome, thanks", "Thanks for helping me"],
+         "responses": ["You're welcome! If you have more questions, feel free to ask.", "Glad I could help! If you need further assistance, just let me know."]
+       },
+       {
+         "tag": "noanswer",
+         "patterns": [],
+         "responses": ["Sorry, can't understand you", "Please give me more info", "Not sure I understand"]
+       },
+       {
+         "tag": "support",
+         "patterns": ["How to contact customer support?", "Need assistance", "Customer service", "Help with an issue"],
+         "responses": ["For assistance, contact our customer support via 'Support' or 'Contact Us' on our website. We're here to help!"],
+         "context": [""]
+       }
+     ]
+   }
+   

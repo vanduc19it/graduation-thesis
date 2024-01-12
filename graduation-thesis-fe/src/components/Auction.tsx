@@ -91,8 +91,23 @@ const Auction = () => {
     }
   };
 
+  const isDataCached = () => {
+    const cachedData = localStorage.getItem('auctionData');
+    return !!cachedData; // Trả về true nếu có dữ liệu trong cache, ngược lại trả về false
+  };
+
+  const [auctionStatus, setAuctionStatus] = useState<any>([]); // Trạng thái đếm ngược
+
   const getListAuction = async () => {
     try {
+      if (isDataCached()) {
+        const cachedData:any = localStorage.getItem('auctionData');
+        const parsedData = JSON.parse(cachedData);
+        setAuction(parsedData);
+        const statusArray = parsedData.map((item:any) => item.endTime * 1000 > Date.now());
+        setAuctionStatus(statusArray);
+      }
+
       const provider = new ethers.providers.JsonRpcProvider(
         "https://polygon-mumbai.infura.io/v3/4cd2c1a8018646908347fb2223053b30"
       );
@@ -101,51 +116,62 @@ const Auction = () => {
         AuctionAbi,
         provider
       );
-      const nft: any = new ethers.Contract(
-        NFTAddress.address,
-        NFTAbi,
-        provider
-      );
-
+      const nft = new ethers.Contract(NFTAddress.address, NFTAbi, provider);
+  
       const createAuction = await auctionContract.getAuctionByStatus(true);
-
-      console.log(createAuction)
-      const newItems: any[] = [];
-
-      for (let i = 0; i < createAuction.length; i++) {
-        const tokenId = createAuction[i]?.tokenId.toNumber();
-        const auctionId = createAuction[i]?.auctionId.toNumber();
-        const startTime = createAuction[i]?.startTime.toNumber();
-        const endTime = createAuction[i]?.endTime.toNumber();
-        const lastBidder = createAuction[i]?.lastBidder;
-        const auctioner= createAuction[i]?.auctioneer;          ;
-
-        const tokenURI = await nft.tokenURI(tokenId);
-        const response = await axios.get(tokenURI);
-        const owner = await nft.ownerOf(tokenId);
-
-        const { name, image, description } = response.data;
-        const lastBid = ethers.utils.formatUnits(createAuction[i]?.lastBid, 'ether')
-
-        const result = await handleGetUser(auctioner);
-
-        const newItem: any = {
-          auctionId: auctionId,
-          idToken: tokenId,
-          name,
-          image,
-          description,
-          lastBid,
-          lastBidder,
-          auctioner,
-          startTime: startTime,
-          endTime: endTime,
-          owner: owner,
-          owner_avatar: result
-        };
-        newItems.push(newItem);
-      }
+  
+      const tokenURIs = await Promise.all(
+        createAuction.map(async (auctionItem:any) => {
+          return await nft.tokenURI(auctionItem?.tokenId.toNumber());
+        })
+      );
+  
+      // Sử dụng Axios để thực hiện các yêu cầu HTTP song song
+      const responses = await Promise.all(
+        tokenURIs.map((tokenURI) => axios.get(tokenURI))
+      );
+  
+      const newItems = await Promise.all(
+        createAuction.map(async (auctionItem:any, i:any) => {
+          const tokenId = auctionItem?.tokenId.toNumber();
+          const auctionId = auctionItem?.auctionId.toNumber();
+          const startTime = auctionItem?.startTime.toNumber();
+          const endTime = auctionItem?.endTime.toNumber();
+          const lastBidder = auctionItem?.lastBidder;
+          const auctioner = auctionItem?.auctioneer;
+  
+          const { name, image, description } = responses[i].data;
+          const owner = await nft.ownerOf(tokenId);
+          const lastBid = ethers.utils.formatUnits(
+            auctionItem?.lastBid,
+            "ether"
+          );
+  
+          const result = await handleGetUser(auctioner);
+  
+          return {
+            auctionId,
+            idToken: tokenId,
+            name,
+            image,
+            description,
+            lastBid,
+            lastBidder,
+            auctioner,
+            startTime,
+            endTime,
+            owner,
+            owner_avatar: result,
+          };
+        })
+      );
+  
       setAuction(newItems);
+      const statusArray = newItems.map(item => item.endTime * 1000 > Date.now());
+      setAuctionStatus(statusArray);
+  
+
+      localStorage.setItem('auctionData', JSON.stringify(newItems));
     } catch (error) {
       console.log(error);
     }
@@ -244,6 +270,21 @@ const Auction = () => {
   };
 
   console.log(auction)
+
+  
+
+  const handleCountdownComplete = (index: number) => {
+
+     setAuctionStatus((prevStatus:any) => {
+      const newStatus = [...prevStatus];
+      newStatus[index] = false;
+      return newStatus;
+    });
+
+  };
+  
+  console.log(auctionStatus)
+
 
   return (
     <>
@@ -421,9 +462,10 @@ const Auction = () => {
                     </Text>
                   </div>
                 </div>
-                <div> 
+                <div>
                   {
-                    item.endTime * 1000 <= Date.now() ? (
+                    
+                    !auctionStatus[index] ? (
                       <Text
                     style={{
                       fontWeight: "600",
@@ -448,7 +490,7 @@ const Auction = () => {
                 </div>
                 <div> 
                   {
-                    item.endTime * 1000 > Date.now() ? (
+                    auctionStatus[index] ? (
                       <Text
                     style={{
                       fontWeight: "600",
@@ -470,9 +512,12 @@ const Auction = () => {
                     <span>🔥</span>
                     <Countdown
                       date={item?.endTime * 1000}
-
-                      // onComplete={()=>handleAuctionFinish(item)}
+                      onComplete={() => handleCountdownComplete(index)}
                     />
+
+
+                    
+                    
                   </Text>
                     ) : (<></>)
                   }
@@ -480,7 +525,7 @@ const Auction = () => {
                 </div>
                 {/* <hr style={{ borderColor: "#eee" }} /> */}
                 <div className={styles.price}>
-                {item.endTime * 1000 > Date.now() ? (
+                {auctionStatus[index] ? (
                    <Button
                    style={{
                      background: "#ae4cff",

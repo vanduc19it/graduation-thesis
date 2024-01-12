@@ -405,11 +405,36 @@ const Profile = () => {
       setLoading(false);
     }
   };
+
+
+  const [auctionStatus, setAuctionStatus] = useState<any>([]);
+  const handleCountdownComplete = (index: number) => {
+
+    setAuctionStatus((prevStatus:any) => {
+     const newStatus = [...prevStatus];
+     newStatus[index] = false;
+     return newStatus;
+   });
+
+ };
   const [nftAuction, setNftAuction] = useState<any[]>([]);
+
+  const isDataCached = () => {
+    const cachedData = localStorage.getItem('auctionData');
+    return !!cachedData; // Trả về true nếu có dữ liệu trong cache, ngược lại trả về false
+  };
   //get list những nft đang đấu giá.
   useEffect(() => {
     const getListAuction = async () => {
       try {
+        if (isDataCached()) {
+          const cachedData:any = localStorage.getItem('auctionData');
+          const parsedData = JSON.parse(cachedData);
+          setNftAuction(parsedData);
+          const statusArray = parsedData.map((item:any) => item.endTime * 1000 > Date.now());
+          setAuctionStatus(statusArray);
+        }
+  
         const provider = new ethers.providers.JsonRpcProvider(
           "https://polygon-mumbai.infura.io/v3/4cd2c1a8018646908347fb2223053b30"
         );
@@ -418,47 +443,62 @@ const Profile = () => {
           AuctionAbi,
           provider
         );
-        const nft: any = new ethers.Contract(
-          NFTAddress.address,
-          NFTAbi,
-          provider
-        );
-
+        const nft = new ethers.Contract(NFTAddress.address, NFTAbi, provider);
+    
         const createAuction = await auctionContract.getAuctionByStatus(true);
-        const newItems: any[] = [];
-
-        for (let i = 0; i < createAuction.length; i++) {
-          const tokenId = createAuction[i]?.tokenId.toNumber();
-        const auctionId = createAuction[i]?.auctionId.toNumber();
-        const startTime = createAuction[i]?.startTime.toNumber();
-        const endTime = createAuction[i]?.endTime.toNumber();
-        const lastBidder = createAuction[i]?.lastBidder;
-        const auctioner= createAuction[i]?.auctioneer;          ;
-
-        const tokenURI = await nft.tokenURI(tokenId);
-        const response = await axios.get(tokenURI);
-        const owner = await nft.ownerOf(tokenId);
-
-        const { name, image, description } = response.data;
-        const lastBid = ethers.utils.formatUnits(createAuction[i]?.lastBid, 'ether')
-
-        const newItem: any = {
-          auctionId: auctionId,
-          idToken: tokenId,
-          name,
-          image,
-          description,
-          lastBid,
-          lastBidder,
-          auctioner,
-          startTime: startTime,
-          endTime: endTime,
-          owner: owner,
-        };
-          newItems.push(newItem);
-        }
-        setNftAuction([]);
-        setNftAuction((prevItems) => [...prevItems, ...newItems]);
+    
+        const tokenURIs = await Promise.all(
+          createAuction.map(async (auctionItem:any) => {
+            return await nft.tokenURI(auctionItem?.tokenId.toNumber());
+          })
+        );
+    
+        // Sử dụng Axios để thực hiện các yêu cầu HTTP song song
+        const responses = await Promise.all(
+          tokenURIs.map((tokenURI) => axios.get(tokenURI))
+        );
+    
+        const newItems = await Promise.all(
+          createAuction.map(async (auctionItem:any, i:any) => {
+            const tokenId = auctionItem?.tokenId.toNumber();
+            const auctionId = auctionItem?.auctionId.toNumber();
+            const startTime = auctionItem?.startTime.toNumber();
+            const endTime = auctionItem?.endTime.toNumber();
+            const lastBidder = auctionItem?.lastBidder;
+            const auctioner = auctionItem?.auctioneer;
+    
+            const { name, image, description } = responses[i].data;
+            const owner = await nft.ownerOf(tokenId);
+            const lastBid = ethers.utils.formatUnits(
+              auctionItem?.lastBid,
+              "ether"
+            );
+    
+            const result = await handleGetUser(auctioner);
+    
+            return {
+              auctionId,
+              idToken: tokenId,
+              name,
+              image,
+              description,
+              lastBid,
+              lastBidder,
+              auctioner,
+              startTime,
+              endTime,
+              owner,
+              owner_avatar: result,
+            };
+          })
+        );
+    
+        setNftAuction(newItems);
+        const statusArray = newItems.map(item => item.endTime * 1000 > Date.now());
+        setAuctionStatus(statusArray);
+    
+  
+        localStorage.setItem('auctionData', JSON.stringify(newItems));
       } catch (error) {
         console.log(error);
       }
@@ -694,7 +734,7 @@ const Profile = () => {
   };
 
 
-   const [finishedAuction, setFinishedAuction] = useState(false);
+   
 
 
    const handleFinishAuction = async(auctionId: any) => {
@@ -1156,9 +1196,9 @@ const Profile = () => {
               style={{
                 fontWeight: "500",
                 fontSize: "16px",
-                background: "#ae4cff",
+                background: "#fff",
                 borderRadius: "30px",
-                color: "white",
+                color: "black",
                 marginRight: "10px",
                 boxShadow: "0 4px 8px 2px rgba(0, 0, 0, 0.1)",
               }}
@@ -1493,7 +1533,7 @@ const Profile = () => {
                       </div>
                       <div> 
                   {
-                    item.endTime * 1000 <= Date.now() ? (
+                    !auctionStatus[id] ? (
                       <Text
                     style={{
                       fontWeight: "600",
@@ -1539,7 +1579,7 @@ const Profile = () => {
                       </div>
                       <div className={styles.button_buy}>
                         {
-                           item.endTime * 1000 <= Date.now() ? (
+                           !auctionStatus[id] ? (
                             <>
                             <Button
                             style={{
@@ -1618,7 +1658,7 @@ const Profile = () => {
                           >
                             <Countdown
                               date={item?.endTime * 1000}
-                              // onComplete={() => alert('Time is up!')}
+                              onComplete={() => handleCountdownComplete(id)}
                             />
                           </Button>
                            <Button

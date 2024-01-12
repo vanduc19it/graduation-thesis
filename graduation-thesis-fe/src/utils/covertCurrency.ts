@@ -3,6 +3,7 @@ import axios from "axios";
 async function convertEthToUsd(eth: number) {
 
   try {
+ 
     const response = await axios.get(
       "https://api.coingecko.com/api/v3/simple/price",
       {
@@ -17,11 +18,11 @@ async function convertEthToUsd(eth: number) {
     const ethAmount = eth;
 
     const usdAmount = ethAmount * ethToUsdRate;
-
     return usdAmount.toFixed(2);
   } catch (error) {
     console.error("Error fetching data from CoinGecko API:", error);
   }
 }
+
 
 export default convertEthToUsd;
