@@ -491,7 +491,7 @@ const CreateNewNFT = () => {
               <Text
                 style={{ fontSize: "14px", color: "#222", fontWeight: "600" }}
               >
-                {price} ETH
+                {price} MATIC
               </Text>
             </div>
           </Card>

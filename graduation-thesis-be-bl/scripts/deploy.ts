@@ -1,25 +1,25 @@
 const hre = require("hardhat");
 
 async function main() {
-  // const NFT = await hre.ethers.getContractFactory("NFT");
-  // const nft = await NFT.deploy("VANDUC", "VDC");
+  const NFT = await hre.ethers.getContractFactory("NFT");
+  const nft = await NFT.deploy("VANDUC", "VDC");
 
-  // const Marketplace = await hre.ethers.getContractFactory("Marketplace");
-  // const marketplace = await Marketplace.deploy(1);
+  const Marketplace = await hre.ethers.getContractFactory("Marketplace");
+  const marketplace = await Marketplace.deploy(1);
 
-  // await nft.deployed();
+  await nft.deployed();
   
-  // console.log("Successfully deployed smart contract to: ", nft.address);
+  console.log("Successfully deployed smart contract to: ", nft.address);
 
-  // await marketplace.deployed();
+  await marketplace.deployed();
   
-  // console.log("Successfully deployed marketplace smc to: ", marketplace.address);
+  console.log("Successfully deployed marketplace smc to: ", marketplace.address);
 
 
-  const Auction = await hre.ethers.getContractFactory("Auction");
-  // const auction = await Auction.deploy("0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889","0x6B713f0DEB67Cd3bFa13a9662C7B8926303618f4");
-  const auction = await Auction.deploy("0x6B713f0DEB67Cd3bFa13a9662C7B8926303618f4");
-  console.log('auction smc deployed at: ', auction.address);
+  // const Auction = await hre.ethers.getContractFactory("Auction");
+  // // const auction = await Auction.deploy("0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889","0x6B713f0DEB67Cd3bFa13a9662C7B8926303618f4");
+  // const auction = await Auction.deploy("0x6B713f0DEB67Cd3bFa13a9662C7B8926303618f4");
+  // console.log('auction smc deployed at: ', auction.address);
 
 }
 // Successfully deployed smart contract to:  0x6B713f0DEB67Cd3bFa13a9662C7B8926303618f4

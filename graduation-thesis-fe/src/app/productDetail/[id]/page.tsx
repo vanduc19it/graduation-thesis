@@ -320,7 +320,7 @@ const saveCartToDatabase = async (walletAddress:any, item:any) => {
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Image src="/eth.png" alt="" style={{ height: "30px" }} />
               <Text style={{ fontWeight: "700", fontSize: "30px" }}>
-                {nft.price} ETH <span style={{color:"#aaa", fontSize:"18px", fontWeight:"500"}}>(${usdPrice})</span>
+                {nft.price} MATIC <span style={{color:"#aaa", fontSize:"18px", fontWeight:"500"}}>(${usdPrice})</span>
               </Text>
             </div>
           </div>
@@ -503,7 +503,7 @@ const saveCartToDatabase = async (walletAddress:any, item:any) => {
               <Text
                 style={{ fontSize: "14px", color: "#222", fontWeight: "600" }}
               >
-                0.05 ETH
+                0.05 MATIC
               </Text>
             </div>
           </Card>
@@ -554,7 +554,7 @@ const saveCartToDatabase = async (walletAddress:any, item:any) => {
               <Text
                 style={{ fontSize: "14px", color: "#222", fontWeight: "600" }}
               >
-                0.05 ETH
+                0.05 MATIC
               </Text>
             </div>
           </Card>
@@ -605,7 +605,7 @@ const saveCartToDatabase = async (walletAddress:any, item:any) => {
               <Text
                 style={{ fontSize: "14px", color: "#222", fontWeight: "600" }}
               >
-                0.05 ETH
+                0.05 MATIC
               </Text>
             </div>
           </Card>
@@ -656,7 +656,7 @@ const saveCartToDatabase = async (walletAddress:any, item:any) => {
               <Text
                 style={{ fontSize: "14px", color: "#222", fontWeight: "600" }}
               >
-                0.05 ETH (convertEthToUsd)
+                0.05 MATIC
               </Text>
             </div>
           </Card>

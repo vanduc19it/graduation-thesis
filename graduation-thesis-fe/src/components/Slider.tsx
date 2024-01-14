@@ -74,7 +74,7 @@ const Slider1 = () => {
                     fontSize: "14px",
                   }}
                 >
-                  Floor: 0.04 ETH
+                  Floor: 0.04 MATIC
                 </Text>
               </div>
             </Card>
@@ -106,7 +106,7 @@ const Slider1 = () => {
                     fontSize: "14px",
                   }}
                 >
-                  Floor: 0.08 ETH
+                  Floor: 0.08 MATIC
                 </Text>
               </div>
             </Card>
@@ -139,7 +139,7 @@ const Slider1 = () => {
                     fontSize: "14px",
                   }}
                 >
-                  Floor: 0.2 ETH
+                  Floor: 0.2 MATIC
                 </Text>
               </div>
             </Card>
@@ -178,7 +178,7 @@ const Slider1 = () => {
                     fontSize: "14px",
                   }}
                 >
-                  Floor: 0.09 ETH
+                  Floor: 0.09 MATIC
                 </Text>
               </div>
             </Card>
@@ -210,7 +210,7 @@ const Slider1 = () => {
                     fontSize: "14px",
                   }}
                 >
-                  Floor: 0.93 ETH
+                  Floor: 0.93 MATIC
                 </Text>
               </div>
             </Card>

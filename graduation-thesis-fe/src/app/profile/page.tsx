@@ -1411,7 +1411,7 @@ const Profile = () => {
                             fontWeight: "600",
                           }}
                         >
-                          {item.price} ETH
+                          {item.price} MATIC
                         </Text>
                       </div>
                     </Card>
@@ -1479,7 +1479,7 @@ const Profile = () => {
                             fontWeight: "600",
                           }}
                         >
-                          {item.price} ETH
+                          {item.price} MATIC
                         </Text>
                       </div>
                     </Card>
@@ -1574,7 +1574,7 @@ const Profile = () => {
                             fontWeight: "600",
                           }}
                         >
-                          {Number(item.lastBid).toFixed(2)} ETH
+                          {Number(item.lastBid).toFixed(2)} MATIC
                         </Text>
                       </div>
                       <div className={styles.button_buy}>
@@ -1742,7 +1742,7 @@ const Profile = () => {
                             fontWeight: "600",
                           }}
                         >
-                          {item.price} ETH
+                          {item.price} MATIC
                         </Text>
                       </div>
                       <div className={styles.button_buy}>

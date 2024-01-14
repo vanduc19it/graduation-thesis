@@ -477,7 +477,7 @@ const Marketplace = () => {
                       fontWeight: "600",
                     }}
                   >
-                    {item.price} ETH
+                    {item.price} MATIC
                   </Text>
                   <Text
                     style={{

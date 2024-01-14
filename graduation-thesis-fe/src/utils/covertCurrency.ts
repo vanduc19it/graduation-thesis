@@ -1,28 +1,15 @@
 "use client";
-import axios from "axios";
 async function convertEthToUsd(eth: number) {
 
+  const rate = 1/0.908806
   try {
- 
-    const response = await axios.get(
-      "https://api.coingecko.com/api/v3/simple/price",
-      {
-        params: {
-          ids: "ethereum",
-          vs_currencies: "usd",
-        },
-      }
-    );
-    const ethToUsdRate = response.data.ethereum.usd;
 
     const ethAmount = eth;
 
-    const usdAmount = ethAmount * ethToUsdRate;
+    const usdAmount = ethAmount * rate;
     return usdAmount.toFixed(2);
   } catch (error) {
     console.error("Error fetching data from CoinGecko API:", error);
   }
 }
-
-
 export default convertEthToUsd;

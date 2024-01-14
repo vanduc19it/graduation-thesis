@@ -458,7 +458,7 @@ const Auction = () => {
                         fontSize: "13px",
                       }}
                     >
-                      {Number(item.lastBid).toFixed(2)} ETH
+                      {Number(item.lastBid).toFixed(2)} MATIC
                     </Text>
                   </div>
                 </div>

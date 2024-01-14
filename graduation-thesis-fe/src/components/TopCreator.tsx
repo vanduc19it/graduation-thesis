@@ -113,7 +113,7 @@ const TopCreator = () => {
                     display: "flex",
                   }}
                 >
-                  128.50 ETH
+                  128.50 MATIC
                 </Text>
               </div>
 
@@ -213,7 +213,7 @@ const TopCreator = () => {
                     display: "flex",
                   }}
                 >
-                  120.70 ETH
+                  120.70 MATIC
                 </Text>
               </div>
 
@@ -313,7 +313,7 @@ const TopCreator = () => {
                     display: "flex",
                   }}
                 >
-                  116.78 ETH
+                  116.78 MATIC
                 </Text>
               </div>
 
@@ -413,7 +413,7 @@ const TopCreator = () => {
                     display: "flex",
                   }}
                 >
-                  112.34 ETH
+                  112.34 MATIC
                 </Text>
               </div>
 
@@ -513,7 +513,7 @@ const TopCreator = () => {
                     display: "flex",
                   }}
                 >
-                  110.30 ETH
+                  110.30 MATIC
                 </Text>
               </div>
 
@@ -613,7 +613,7 @@ const TopCreator = () => {
                     display: "flex",
                   }}
                 >
-                  108.90 ETH
+                  108.90 MATIC
                 </Text>
               </div>
 
@@ -713,7 +713,7 @@ const TopCreator = () => {
                     display: "flex",
                   }}
                 >
-                  105.67 ETH
+                  105.67 MATIC
                 </Text>
               </div>
 
@@ -813,7 +813,7 @@ const TopCreator = () => {
                     display: "flex",
                   }}
                 >
-                  102.34 ETH
+                  102.34 MATIC
                 </Text>
               </div>
 
